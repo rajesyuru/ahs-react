@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { addAlert } from '../../redux/actions/alert';
 
 const AddProduct = ({user, history, alert}) => {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (user.merchant_id === null || user.group_id !== 1) {
@@ -29,13 +29,14 @@ const AddProduct = ({user, history, alert}) => {
                 history.push('/products/get');
             },
             (error) => {
+                setLoading(false);
                 alert(`Telah terjadi kesalahan: ${error}`);
             }
         );
     };
     return (
         <div>
-            <ProductForm onSubmit={submitHandler} />
+            <ProductForm onSubmit={submitHandler} loading={loading}/>
         </div>
     )
 };

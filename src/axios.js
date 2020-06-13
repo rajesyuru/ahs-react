@@ -125,9 +125,9 @@ const refreshToken = async () => {
 
 export const put = async (
     path,
+    payload,
     success = () => {},
-    error = () => {},
-    payload
+    error = () => {}
 ) => {
     try {
         let config = {};

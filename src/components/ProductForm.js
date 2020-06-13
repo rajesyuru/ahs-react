@@ -1,22 +1,33 @@
 import React, {useState, useEffect} from 'react';
 import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { withRouter } from 'react-router-dom';
+import { addAlert } from '../redux/actions/alert';
 
-const ProductForm = ({ onSubmit = () => {}, loading }) => {
-    const [name, setName] = useState("");
-    const [price, setPrice] = useState("");
+const ProductForm = ({ onSubmit = () => {}, loading, stateName = "", statePrice = "", action, alert }) => {
+    const [name, setName] = useState('');
+    const [price, setPrice] = useState('');
 
     useEffect(() => {
-        if (!loading) {
-            setName('');
-            setPrice('');
-        }
-    }, [loading])
+        setName(stateName);
+        setPrice(statePrice);
+    }, [stateName, statePrice])
 
     const submitHandler = (e) => {
         e.preventDefault();
 
+        if (!name.length > 0) {
+            alert(`Nama produk perlu diisi`)
+            return;
+        } else if (!price.length > 0) {
+            alert('Harga perlu diisi')
+            return;
+        }
+
         onSubmit(name, price * 1);
     };
+
+    // console.log(loading)
     
 
     return (
@@ -41,8 +52,8 @@ const ProductForm = ({ onSubmit = () => {}, loading }) => {
                     onChange={(e) => setPrice(e.target.value)}
                 />
             </div>
-            <button type="submit" className="btn btn-primary">
-                Submit
+            <button type="submit" className={`btn btn-primary ${loading ? "disabled" : ""}`} disabled={loading} >
+                {action ? action : "Submit"}
             </button>
         </form>
     )
@@ -52,4 +63,8 @@ const ProductForm = ({ onSubmit = () => {}, loading }) => {
 //     onSubmit: PropTypes.func.isRequired,
 // };
 
-export default ProductForm
+const mapDispatchToProps = (dispatch) => ({
+    alert: (message) => dispatch(addAlert(message))
+})
+
+export default connect(null, mapDispatchToProps)(ProductForm);

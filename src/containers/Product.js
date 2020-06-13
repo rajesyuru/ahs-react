@@ -4,9 +4,9 @@ import { withRouter, Switch, Route } from 'react-router-dom';
 import GetProducts from './Products/GetProducts';
 import AddProduct from './Products/AddProduct';
 import EditProduct from './Products/EditProduct';
+import { addAlert } from '../redux/actions/alert';
 
-const Product = ({history, user}) => {
-
+const Product = ({history, user, alert}) => {
     const [me, setMe] = useState({})
 
     useEffect(() => {
@@ -34,4 +34,8 @@ const mapStateToProps = (state) => ({
     user: state.user
 })
 
-export default connect(mapStateToProps)(Product);
+const mapDispatchToProps = (dispatch) => ({
+    alert: (message) => dispatch(addAlert(message))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Product);

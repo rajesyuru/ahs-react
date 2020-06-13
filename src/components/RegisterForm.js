@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { addAlert } from '../redux/actions/alert';
+import { connect } from 'react-redux';
 
-function RegisterForm({ onSubmit = () => {} }) {
+function RegisterForm({ onSubmit = () => {}, loading, alert}) {
     const [name, setName] = useState("");
-    const [merchantName, setMerchantName] = useState("");
+    const [ahs, setAhs] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [password2, setPassword2] = useState("");
@@ -10,7 +12,24 @@ function RegisterForm({ onSubmit = () => {} }) {
     const submitHandler = (e) => {
         e.preventDefault();
 
-        onSubmit(name, merchantName, email, password, password2);
+        if (!name.length > 0) {
+            alert(`Nama perlu diisi`)
+            return;
+        } else if (!email.length > 0) {
+            alert('Email perlu diisi')
+            return;
+        } else if (!ahs.length > 0) {
+            alert('Nama AHS perlu diisi')
+            return;
+        } else if (!password.length > 0 || !password2.length > 0) {
+            alert('Password perlu diisi')
+            return;
+        } else if (password !== password2) {
+            alert('Password harus sama')
+            return;
+        }
+
+        onSubmit(name, ahs, email, password);
     };
 
     return (
@@ -36,13 +55,13 @@ function RegisterForm({ onSubmit = () => {} }) {
                 />
             </div>
             <div className="form-group">
-                <label htmlFor="merchantName">Nama AHS</label>
+                <label htmlFor="name">Nama AHS</label>
                 <input
                     type="text"
                     className="form-control"
-                    id="merchantName"
-                    value={merchantName}
-                    onChange={(e) => setMerchantName(e.target.value)}
+                    id="name"
+                    value={ahs}
+                    onChange={(e) => setAhs(e.target.value)}
                 />
             </div>
             <div className="form-group">
@@ -67,11 +86,15 @@ function RegisterForm({ onSubmit = () => {} }) {
                     onChange={(e) => setPassword2(e.target.value)}
                 />
             </div>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className={`btn btn-primary ${loading && "disabled"}`} disabled={loading}>
                 Submit
             </button>
         </form>
     );
-}
+};
 
-export default RegisterForm;
+const mapDispatchToProps = (dispatch) => ({
+    alert: (message) => dispatch(addAlert(message))
+})
+
+export default connect(null, mapDispatchToProps)(RegisterForm);

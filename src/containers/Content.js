@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { Switch, Route } from 'react-router';
 import { withRouter } from "react-router-dom";
 import { connect } from 'react-redux';
@@ -7,9 +7,9 @@ import Home from './Home';
 import GetUsers from './GetUsers';
 import Product from './Product';
 import Login from './Login';
+import Merchant from './Merchant';
 
 const Content = ({ user }) => {
-
     return (
         <Switch>
             {user ? (
@@ -17,6 +17,7 @@ const Content = ({ user }) => {
                     <Route path="/" exact component={Home} />
                     <Route path="/users" exact component={GetUsers} />
                     <Route path="/products" component={Product} />
+                    <Route path="/merchants" component={Merchant} />
                 </Fragment>
             ) : (
                 <Route path="/" exact component={Login} />
@@ -27,7 +28,8 @@ const Content = ({ user }) => {
 };
 
 const mapStateToProps = (state) => ({
-    user: state.user
-})
+    user: state.user,
+    merchant: state.merchant
+});
 
 export default connect(mapStateToProps)(Content);

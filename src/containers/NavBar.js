@@ -25,6 +25,12 @@ function NavBar({ user, logout , history }) {
         history.push("/products/get")
     };
 
+    const merchantHandler = (e) => {
+        e.preventDefault();
+
+        history.push("/merchants/get");
+    };
+
     const home = (e) => {
         e.preventDefault();
 
@@ -74,6 +80,12 @@ function NavBar({ user, logout , history }) {
                             Products
                         </a>
                     </li>
+                    {!user.merchant_id && <li className={`nav-item ${activeLink('/merchants/get')}`}>
+                        <a className="nav-link" href="#" onClick={merchantHandler}>
+                            Merchants
+                        </a>
+                    </li>
+                    }
                     <li className="nav-item">
                         <a className="nav-link" href="#" onClick={logoutHandler}>
                             Logout

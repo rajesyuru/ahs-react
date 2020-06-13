@@ -124,22 +124,9 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                     ))}
                 </tbody>
             </table>
-            {auth ? (
+            {auth && (
                 <Link className="m-0" to="/products/add">
                     <span className="material-icons" style={{ fontSize: 30 }}>
-                        add_box
-                    </span>
-                </Link>
-            ) : (
-                <Link
-                    className="m-0"
-                    to="/"
-                    style={{ pointerEvents: 'none', userSelect: 'none' }}
-                >
-                    <span
-                        className="material-icons text-muted"
-                        style={{ fontSize: 30 }}
-                    >
                         add_box
                     </span>
                 </Link>

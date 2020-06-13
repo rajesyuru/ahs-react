@@ -1,6 +1,6 @@
 import { post, get } from "../../axios";
 import { addAlert } from "./alert";
-import { USER_SET, USER_REMOVE, PRODUCT_REMOVE } from "../actionTypes";
+import { USER_SET, USER_REMOVE, PRODUCT_REMOVE, MERCHANT_AUTH_FALSE } from "../actionTypes";
 
 export const login = (email, password) => (dispatch) => {
     post(
@@ -43,4 +43,5 @@ export const logout = () => (dispatch) => {
     localStorage.removeItem("refreshToken");
     dispatch({ type: USER_REMOVE });
     dispatch({ type: PRODUCT_REMOVE });
+    dispatch({ type: MERCHANT_AUTH_FALSE });
 };

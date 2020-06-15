@@ -91,7 +91,7 @@ export const postWithAuth = async (
             await refreshToken();
 
             // re-run
-            await post(path, payload, success, error);
+            await postWithAuth(path, payload, success, error);
         } else {
             error(err.response && err.response.data);
         }

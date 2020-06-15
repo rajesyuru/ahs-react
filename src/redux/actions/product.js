@@ -21,4 +21,3 @@ export const getProducts = (page) => (dispatch) => {
         }
     );
 };
-

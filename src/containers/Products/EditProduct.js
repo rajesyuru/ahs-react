@@ -15,13 +15,17 @@ const EditProduct = ({ user, history, alert }) => {
         if (user.merchant_id === null || user.group_id !== 1) {
             alert('Login sebagai admin merchant untuk menambahkan produk');
             history.push('/products/get');
-        };
+        }
         const prodNotFound = () => {
             alert('Product not found');
             history.push('/products/get');
-        }
+        };
         const search = history.location.search;
-        if (!search.includes('id') || !search.includes('name') || !search.includes('price')) {
+        if (
+            !search.includes('id') ||
+            !search.includes('name') ||
+            !search.includes('price')
+        ) {
             prodNotFound();
         }
         const queryId = search.split('&')[0];
@@ -30,32 +34,34 @@ const EditProduct = ({ user, history, alert }) => {
         let queryIdToString;
         let queryNameToString;
         let queryPriceToString;
-        if (!queryId || !queryName || !queryPrice ) {
+        if (!queryId || !queryName || !queryPrice) {
             prodNotFound();
         } else {
             queryIdToString = queryId.replace('?id=', '');
             queryNameToString = queryName.substring(5).split('%20').join(' ');
             queryPriceToString = queryPrice.replace('price=', '');
-            if (!/^\d+$/.test(queryIdToString) || !/^\d+$/.test(queryPriceToString)) {
+            if (
+                !/^\d+$/.test(queryIdToString) ||
+                !/^\d+$/.test(queryPriceToString)
+            ) {
                 prodNotFound();
             } else {
                 setId(queryIdToString);
                 setName(queryNameToString);
                 setPrice(queryPriceToString);
             }
-        };
-        
+        }
 
         // console.log(/^\d+$/.test());
     }, []);
 
     const submitHandler = (name, price) => {
-        setLoading(true)
+        setLoading(true);
         put(
             `/products/${id}`,
             {
                 name,
-                price
+                price,
             },
             (success) => {
                 alert('Produk berhasil diedit', 'success');
@@ -66,7 +72,7 @@ const EditProduct = ({ user, history, alert }) => {
                 setLoading(false);
                 alert(`Telah terjadi kesalahan: ${error}`);
             }
-        )
+        );
     };
     return (
         <div>

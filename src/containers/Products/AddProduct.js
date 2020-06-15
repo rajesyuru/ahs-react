@@ -1,27 +1,27 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductForm from '../../components/ProductForm';
 import { postWithAuth } from '../../axios';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { addAlert } from '../../redux/actions/alert';
 
-const AddProduct = ({user, history, alert}) => {
+const AddProduct = ({ user, history, alert }) => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (user.merchant_id === null || user.group_id !== 1) {
-            history.push('/products/get')
-            alert('Login sebagai admin merchant untuk menambahkan produk')
-        };
+            history.push('/products/get');
+            alert('Login sebagai admin merchant untuk menambahkan produk');
+        }
     }, []);
 
     const submitHandler = (name, price) => {
-        setLoading(true)
+        setLoading(true);
         postWithAuth(
             '/products',
             {
                 name,
-                price
+                price,
             },
             (success) => {
                 alert('Produk berhasil ditambahkan', 'success');
@@ -36,9 +36,9 @@ const AddProduct = ({user, history, alert}) => {
     };
     return (
         <div>
-            <ProductForm onSubmit={submitHandler} loading={loading}/>
+            <ProductForm onSubmit={submitHandler} loading={loading} />
         </div>
-    )
+    );
 };
 
 const mapStateToProps = (state) => ({
@@ -46,7 +46,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-    alert: (message, type) => dispatch(addAlert(message, type))
+    alert: (message, type) => dispatch(addAlert(message, type)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddProduct);

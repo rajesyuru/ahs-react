@@ -22,7 +22,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
 
     useEffect(() => {
         getProducts(page);
-    }, [])
+    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -61,7 +61,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
             } else {
                 setProducts(data);
             }
-        };
+        }
     }, [page, history.location, product, products]);
 
     const activePage = (p) => {
@@ -110,7 +110,9 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                             <td className="d-flex justify-content-between">
                                 {product.owner.name}
                                 {auth ? (
-                                    <Link to={`/products/edit?id=${product.id}&name=${product.name}&price=${product.price}`}>
+                                    <Link
+                                        to={`/products/edit?id=${product.id}&name=${product.name}&price=${product.price}`}
+                                    >
                                         <span
                                             className={`material-icons align-middle`}
                                             style={{ marginBottom: 2 }}

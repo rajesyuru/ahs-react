@@ -31,6 +31,7 @@ const AddMerchant = ({alert, history}) => {
                         history.push('/merchants/get')
                     },
                     (error) => {
+                        console.log(error)
                         alert('Telah terjadi kesalahan');
                     }
                 );

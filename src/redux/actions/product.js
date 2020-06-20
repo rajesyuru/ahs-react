@@ -2,9 +2,9 @@ import { post, get } from "../../axios";
 import { addAlert } from "./alert";
 import { PRODUCT_GET } from '../actionTypes';
 
-export const getProducts = (page) => (dispatch) => {
+export const getProducts = (page, limit = '10') => (dispatch) => {
     get(
-        `/products?limit=10&page=${page}`,
+        `/products?limit=${limit}&page=${page}`,
          (success) => {
             dispatch({
                 type: PRODUCT_GET,

@@ -10,6 +10,7 @@ const EditProduct = ({ user, history, alert }) => {
     const [id, setId] = useState('');
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
+    const [buyingPrice, setBuyingPrice] = useState('');
 
     useEffect(() => {
         if (user.merchant_id === null || user.group_id !== 1) {
@@ -24,44 +25,54 @@ const EditProduct = ({ user, history, alert }) => {
         if (
             !search.includes('id') ||
             !search.includes('name') ||
-            !search.includes('price')
+            !search.includes('price') ||
+            !search.includes('buying_price')
         ) {
             prodNotFound();
         }
         const queryId = search.split('&')[0];
         const queryName = search.split('&')[1];
         const queryPrice = search.split('&')[2];
+        const queryBuyingPrice = search.split('&')[3];
         let queryIdToString;
         let queryNameToString;
         let queryPriceToString;
-        if (!queryId || !queryName || !queryPrice) {
+        let queryBuyingPriceToString;
+        if (!queryId || !queryName || !queryPrice || !queryBuyingPrice) {
             prodNotFound();
         } else {
             queryIdToString = queryId.replace('?id=', '');
             queryNameToString = queryName.substring(5).split('%20').join(' ');
             queryPriceToString = queryPrice.replace('price=', '');
+            queryBuyingPriceToString = queryBuyingPrice.replace(
+                'buying_price=',
+                ''
+            );
             if (
                 !/^\d+$/.test(queryIdToString) ||
-                !/^\d+$/.test(queryPriceToString)
+                !/^\d+$/.test(queryPriceToString) ||
+                !/^\d+$/.test(queryBuyingPriceToString)
             ) {
                 prodNotFound();
             } else {
                 setId(queryIdToString);
                 setName(queryNameToString);
                 setPrice(queryPriceToString);
+                setBuyingPrice(queryBuyingPriceToString);
             }
         }
 
         // console.log(/^\d+$/.test());
     }, []);
 
-    const submitHandler = (name, price) => {
+    const submitHandler = (name, price, buying_price) => {
         setLoading(true);
         put(
             `/products/${id}`,
             {
                 name,
                 price,
+                buying_price,
             },
             (success) => {
                 alert('Produk berhasil diedit', 'success');
@@ -81,6 +92,7 @@ const EditProduct = ({ user, history, alert }) => {
                 loading={loading}
                 stateName={name}
                 statePrice={price}
+                stateBuyingPrice={buyingPrice}
                 action="Edit"
             />
         </div>

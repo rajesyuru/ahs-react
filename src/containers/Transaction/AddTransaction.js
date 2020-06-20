@@ -27,14 +27,16 @@ const AddTransaction = ({ alert, history }) => {
         );
     }, []);
 
-    const onSubmitHandler = (date, product_id, quantity) => {
+    const onSubmitHandler = (date, product_id, type, quantity, info) => {
         setSubmitting(true);
         postWithAuth(
             '/transactions',
             {
                 date,
                 product_id,
+                type,
                 quantity,
+                info
             },
             (success) => {
                 setSubmitting(false);
@@ -42,6 +44,7 @@ const AddTransaction = ({ alert, history }) => {
                 history.push('/transactions/get');
             },
             (error) => {
+                setSubmitting(false);
                 alert('Telah terjadi kesalahan');
             }
         );

@@ -82,6 +82,7 @@ export const postWithAuth = async (
             error(resp.data);
         }
     } catch (err) {
+        console.log(err.response)
         if (
             err.response &&
             err.response.data &&

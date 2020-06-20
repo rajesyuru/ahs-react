@@ -15,13 +15,14 @@ const AddProduct = ({ user, history, alert }) => {
         }
     }, []);
 
-    const submitHandler = (name, price) => {
+    const submitHandler = (name, price, buying_price) => {
         setLoading(true);
         postWithAuth(
             '/products',
             {
                 name,
                 price,
+                buying_price,
             },
             (success) => {
                 alert('Produk berhasil ditambahkan', 'success');
@@ -29,6 +30,7 @@ const AddProduct = ({ user, history, alert }) => {
                 history.push('/products/get');
             },
             (error) => {
+                console.log(error);
                 setLoading(false);
                 alert(`Telah terjadi kesalahan: ${error}`);
             }

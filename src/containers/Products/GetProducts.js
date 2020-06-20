@@ -15,23 +15,29 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
     const [loading, setLoading] = useState(true);
     const [totalProduct, setTotalProduct] = useState(1);
     const [auth, setAuth] = useState(false);
+    const [limit, setLimit] = useState(10);
 
     const numberWithCommas = (x) => {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
     useEffect(() => {
-        getProducts(page);
-    }, []);
+        getProducts(page, limit);
+    }, [limit]);
 
     useEffect(() => {
         setLoading(true);
-        const search = history.location.search;
+        const search = history.location.search.substring(1);
 
-        if (search.includes('page')) {
-            setPage(search.substring(6) * 1);
+        if (
+            !search.includes('page') &&
+            history.location.pathname === '/products/get'
+        ) {
+            if (page !== 1) {
+                history.push(`/products/get?page=${page}`);
+            }
         } else {
-            history.push(`/products/get?page=${page}`);
+            setPage(search.substring(5) * 1);
         }
 
         if (user.merchant_id !== null && user.group_id === 1) {
@@ -39,7 +45,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
         }
 
         if (product === null) {
-            getProducts(page);
+            getProducts(page, limit);
         } else {
             const { data, totalPage, totalData } = product;
 
@@ -62,7 +68,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                 setProducts(data);
             }
         }
-    }, [page, history.location, product, products]);
+    }, [page, history.location, product, products, limit]);
 
     const activePage = (p) => {
         if (loading) {
@@ -92,6 +98,22 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
 
     return (
         <div className="container-fluid">
+            <div className="form-inline my-2">
+                <label htmlFor="number" className="mr-2">
+                    Show entries:
+                </label>
+                <select
+                    id="number"
+                    className="form-control form-control-sm"
+                    onChange={(e) => setLimit(e.target.value)}
+                    defaultValue={10}
+                >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={15}>15</option>
+                    <option value={20}>20</option>
+                </select>
+            </div>
             <table className={`table table-striped table-bordered mb-0`}>
                 <thead>
                     <tr>
@@ -174,7 +196,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message) => dispatch(addAlert(message)),
-    getProducts: (page) => dispatch(getProducts(page)),
+    getProducts: (page, limit) => dispatch(getProducts(page, limit)),
 });
 
 const mapStateToProps = (state) => ({

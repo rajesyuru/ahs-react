@@ -54,7 +54,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
         } else {
             const { data, totalPage, totalData } = product;
 
-            if (products.length !== 0) {
+            if (products && products.length !== 0) {
                 setProducts(data);
                 setInterval(() => {
                     setLoading(false);
@@ -135,7 +135,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {products.map((product) => (
+                    {products && products.map((product) => (
                         <tr key={product.id} className={d}>
                             <td>{product.id}</td>
                             <td>{product.name}</td>

@@ -125,7 +125,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
 
     return (
         <div className="container-fluid">
-            <table className={`table table-striped table-bordered mb-0`}>
+            <table className={`table table-hover table-bordered mb-0`}>
                 <thead>
                     <tr>
                         <th scope="col">ID</th>

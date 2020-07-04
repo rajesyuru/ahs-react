@@ -161,7 +161,7 @@ const GetTransaction = ({
     };
 
     return (
-        <div className={`container-fluid ${deleting && 'pl-5'} ${d}`}>
+        <div className={`container-fluid ${deleting && 'pl-5'}`}>
             <table className={`table table-hover table-bordered mb-0`}>
                 <thead>
                     <tr>
@@ -172,7 +172,7 @@ const GetTransaction = ({
                         <th scope="col">Price</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className={`${d}`}>
                     {transactions && transactions.length > 0 ? (
                         transactions.map((tran) => (
                             <tr

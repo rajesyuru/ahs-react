@@ -46,7 +46,7 @@ const GetTransaction = ({
         } else {
             const { data, totalPage, totalData } = transaction;
 
-            if (transactions.length !== 0) {
+            if (transactions && transactions.length !== 0) {
                 setTransactions(data);
                 setInterval(() => {
                     setLoading(false);
@@ -173,7 +173,7 @@ const GetTransaction = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {transactions.length > 0 ? (
+                    {transactions && transactions.length > 0 ? (
                         transactions.map((tran) => (
                             <tr
                                 key={tran.id}

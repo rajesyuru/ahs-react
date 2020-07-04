@@ -22,7 +22,7 @@ const GetMerchants = ({ alert }) => {
     }, []);
     return (
         <div>
-            <table className={`table table-striped table-bordered ${d} mb-0`}>
+            <table className={`table table-hover table-bordered mb-0`}>
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -31,7 +31,7 @@ const GetMerchants = ({ alert }) => {
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className={`${d}`}>
                     {merchants.map((merchant) => (
                         <tr key={merchant.id}>
                             <td>{merchant.id}</td>

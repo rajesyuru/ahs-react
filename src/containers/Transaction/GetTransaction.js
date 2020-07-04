@@ -6,6 +6,10 @@ import { getTransactions } from '../../redux/actions/transaction';
 import moment from 'moment';
 import 'moment/locale/id';
 import { put } from '../../axios';
+import InfoTooltip from '../../components/InfoTooltip';
+import DeleteModal from '../../components/Transaction/DeleteModal';
+import ModifyingButtons from '../../components/ModifyingButtons';
+import { formatPrice } from '../../utilities';
 
 const GetTransaction = ({
     alert,
@@ -36,24 +40,7 @@ const GetTransaction = ({
         getTransaction(page);
     }, []);
 
-    useEffect(() => {
-        setLoading(true);
-        const search = history.location.search.substring(1);
-        if (
-            !search.includes('page') &&
-            history.location.pathname === '/transactions/get'
-        ) {
-            if (page !== 1) {
-                history.push(`/transactions/get?page=${page}`);
-            }
-        } else {
-            setPage(search.substring(5) * 1);
-        }
-
-        if (user.merchant_id !== null && user.group_id === 1) {
-            setAuth(true);
-        }
-
+    const loadDataToPage = () => {
         if (!transaction) {
             getTransaction(page);
         } else {
@@ -77,6 +64,27 @@ const GetTransaction = ({
                 setTransactions(data);
             }
         }
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        const search = history.location.search.substring(1);
+        if (
+            !search.includes('page') &&
+            history.location.pathname === '/transactions/get'
+        ) {
+            if (page !== 1) {
+                history.push(`/transactions/get?page=${page}`);
+            }
+        } else {
+            setPage(search.substring(5) * 1);
+        }
+
+        if (user.merchant_id !== null && user.group_id === 1) {
+            setAuth(true);
+        }
+
+        loadDataToPage();
     }, [page, history.location, transaction, transactions]);
 
     const activePage = (p) => {
@@ -108,18 +116,20 @@ const GetTransaction = ({
     const deleteData = () => {
         setD('d-none');
         setLoading(true);
-        console.log(selected);
         put(
             '/transactions',
             {
                 ids: selected,
             },
             (success) => {
+                getTransaction(page);
                 alert('Data berhasil dihapus', 'success');
-                getTransactions(page);
-                setD('d-none');
-                setLoading(true);
+                loadDataToPage();
+                setD('');
+                setLoading(false);
                 setSelected([]);
+                setDeleting(false);
+                setEditing(false);
             },
             (error) => {
                 alert('Telah terjadi kesalahan');
@@ -140,21 +150,56 @@ const GetTransaction = ({
         </button>
     );
 
+    const editingButton = () => {
+        setEditing(true);
+        setDeleting(false);
+    };
+
+    const deletingButton = () => {
+        setEditing(false);
+        setDeleting(true);
+    };
+
     return (
-        <div className={`container-fluid ${deleting && 'pl-5'}`}>
-            <table className={`table table-striped table-bordered mb-0 ${d}`}>
+        <div className={`container-fluid ${deleting && 'pl-5'} ${d}`}>
+            <table className={`table table-hover table-bordered mb-0`}>
                 <thead>
                     <tr>
                         <th scope="col">Date</th>
                         <th scope="col">Product Name</th>
-                        <th scope="col">Price</th>
+                        <th scope="col">Type</th>
                         <th scope="col">Quantity</th>
+                        <th scope="col">Price</th>
                     </tr>
                 </thead>
                 <tbody>
                     {transactions.length > 0 ? (
                         transactions.map((tran) => (
-                            <tr key={tran.id}>
+                            <tr
+                                key={tran.id}
+                                onClick={(e) => {
+                                    if (deleting) {
+                                        if (
+                                            !e.currentTarget.children[0]
+                                                .children[0].checked
+                                        ) {
+                                            e.currentTarget.children[0].children[0].checked = true;
+                                            setSelected((prevData) => [
+                                                ...prevData,
+                                                tran.id * 1,
+                                            ]);
+                                        } else {
+                                            e.currentTarget.children[0].children[0].checked = false;
+                                            setSelected((prevData) =>
+                                                prevData.filter(
+                                                    (i) =>
+                                                        i !== tran.id * 1
+                                                )
+                                            );
+                                        }
+                                    }
+                                }} style={{userSelect: deleting && 'none'}}
+                            >
                                 <td>
                                     {moment(tran.date).format('LL')}
                                     {deleting && (
@@ -163,41 +208,20 @@ const GetTransaction = ({
                                             className="position-absolute mt-2"
                                             id={tran.id}
                                             value={tran.id}
-                                            style={{ left: '3%' }}
-                                            onChange={(e) => {
-                                                e.persist();
-                                                if (e.target.checked) {
-                                                    setSelected((prevData) => [
-                                                        ...prevData,
-                                                        e.target.value * 1,
-                                                    ]);
-                                                } else {
-                                                    setSelected((prevData) =>
-                                                        prevData.filter(
-                                                            (i) =>
-                                                                i !==
-                                                                e.target.value *
-                                                                    1
-                                                        )
-                                                    );
-                                                }
-                                            }}
+                                            style={{ left: '3%', userSelect: 'none', pointerEvents: 'none' }}
                                         />
                                     )}
                                 </td>
                                 <td>{tran.product.name}</td>
-                                <td>Rp. {numberWithCommas(tran.price)}</td>
+                                <td>
+                                    {tran.type === 'sell' ? 'Jual' : 'Beli'}
+                                </td>
+                                <td>{tran.quantity}</td>
                                 <td className="d-flex justify-content-between">
-                                    {tran.quantity}
+                                    Rp. {formatPrice(tran.price)}
                                     {auth && editing && (
                                         <Link
-                                            to={`/transactions/edit?id=${
-                                                tran.id
-                                            }&date=${moment(tran.date).format(
-                                                'YYYY-MM-DD'
-                                            )}&product_id=${
-                                                tran.product.id
-                                            }&quantity=${tran.quantity}`}
+                                            to={`/transactions/edit?id=${tran.id}`}
                                         >
                                             <span
                                                 className={`material-icons align-middle`}
@@ -206,6 +230,9 @@ const GetTransaction = ({
                                                 edit
                                             </span>
                                         </Link>
+                                    )}
+                                    {!editing && tran.info && (
+                                        <InfoTooltip info={tran.info} />
                                     )}
                                 </td>
                             </tr>
@@ -235,42 +262,12 @@ const GetTransaction = ({
                         )}
 
                         {deleting || editing || (
-                            <div>
-                                <button
-                                    className="btn btn-info px-2"
-                                    onClick={() => {
-                                        setEditing(true);
-                                        setDeleting(false);
-                                    }}
-                                >
-                                    <span
-                                        className="material-icons text-light"
-                                        style={{ fontSize: 20, marginTop: 2 }}
-                                    >
-                                        edit
-                                    </span>
-                                </button>
-                                <button
-                                    className="btn btn-danger px-2"
-                                    onClick={() => {
-                                        setEditing(false);
-                                        setDeleting(true);
-                                    }}
-                                >
-                                    <span
-                                        className="material-icons text-light"
-                                        style={{ fontSize: 20, marginTop: 2 }}
-                                    >
-                                        delete
-                                    </span>
-                                </button>
-                            </div>
+                            <ModifyingButtons
+                                editingButton={editingButton}
+                                deletingButton={deletingButton}
+                            />
                         )}
-                        {editing && (
-                            <div className="mt-1">
-                                {cancelButton}
-                            </div>
-                        )}
+                        {editing && <div className="mt-1">{cancelButton}</div>}
                     </div>
                     {deleting && (
                         <Fragment>
@@ -293,51 +290,7 @@ const GetTransaction = ({
                 </Fragment>
             )}
 
-            <div
-                className="modal fade"
-                tabIndex="-1"
-                id="modal"
-                role="dialog"
-                data-backdrop="static"
-                aria-hidden="true"
-            >
-                <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h3 className="modal-title text-danger">
-                                Warning!
-                            </h3>
-                        </div>
-                        <div className="modal-body py-3">
-                            <p className="font-weight-bold">
-                                Are you really sure want to delete{' '}
-                                {selected.length > 1
-                                    ? 'these items'
-                                    : 'this item'}
-                                ?
-                            </p>
-                            <small>(Note: You cannot undo this action)</small>
-                        </div>
-                        <div className="modal-footer">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                data-dismiss="modal"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-danger"
-                                data-dismiss="modal"
-                                onClick={deleteData}
-                            >
-                                Delete Permanently
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <DeleteModal deleteHandler={deleteData} selectedData={selected} />
         </div>
     );
 };

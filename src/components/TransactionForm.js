@@ -15,11 +15,11 @@ const TransactionForm = ({
     onSubmit = () => {},
     loading,
     stateDate,
-    stateSelected,
+    stateSelected = '',
     stateProduct = [],
     stateQuantity = '',
     stateType = '',
-    stateInfo,
+    stateInfo = '',
     action,
     alert,
 }) => {
@@ -28,11 +28,12 @@ const TransactionForm = ({
     const [quantity, setQuantity] = useState('');
     const [type, setType] = useState('');
     const [info, setInfo] = useState('');
+    const [maxInfo, setMaxInfo] = useState(stateInfo.length ? 150 - stateInfo.length : 150);
 
     useEffect(() => {
         setDate(stateDate);
         setQuantity(stateQuantity);
-        setSelected(stateSelected);
+        setSelected(`${stateSelected}`);
         setType(stateType);
         setInfo(stateInfo);
     }, [stateDate, stateQuantity, stateSelected, stateType, stateInfo]);
@@ -49,17 +50,12 @@ const TransactionForm = ({
         } else if (!type.length > 0) {
             return alert('Jenis transaksi perlu dipilih');
         }
-
-        if (!/\S/.test(info) && info.length > 0) {
-            setInfo('');
-        }
-
         onSubmit(
             today,
             selected * 1,
             type,
             quantity * 1,
-            info.length > 0 ? info : null
+            /\S/.test(info) && info.length > 0 ? info : null
         );
     };
 
@@ -112,6 +108,7 @@ const TransactionForm = ({
                             name="type"
                             id="buy"
                             value="buy"
+                            checked={type === 'buy'}
                             onChange={(e) => {
                                 if (e.target.checked) {
                                     setType(e.target.value);
@@ -127,6 +124,7 @@ const TransactionForm = ({
                             name="type"
                             id="sell"
                             value="sell"
+                            checked={type === 'sell'}
                             onChange={(e) => {
                                 if (e.target.checked) {
                                     setType(e.target.value);
@@ -151,13 +149,14 @@ const TransactionForm = ({
                 />
             </div>
             <div>
-                <label htmlFor="info">Info tambahan:</label>
+                        <label htmlFor="info">Info tambahan ({`${maxInfo}`}):</label>
                 <textarea
                     className="form-control mb-4"
                     id="info"
                     rows="2"
+                    maxLength="150"
                     value={info}
-                    onChange={(e) => setInfo(e.target.value)}
+                    onChange={(e) => {setInfo(e.target.value); setMaxInfo(150 - e.target.value.length)}}
                     placeholder={`--Tambahkan info/catatan khusus untuk transaksi ini (contoh: 'Belum dibayar')-- `}
                 />
             </div>

@@ -64,7 +64,7 @@ const ProductForm = ({
                     />
                 </div>
                 <label htmlFor="buying-price">Buying Price</label>
-                <div className="input-group mb-2">
+                <div className="input-group mb-3">
                     <div className="input-group-prepend">
                         <span className="input-group-text">Rp.</span>
                     </div>

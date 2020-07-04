@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseUrl = 'https://ahs-merdeka.herokuapp.com/api/v1';
+const baseUrl = process.env.REACT_APP_BACKEND_URL || 'https://ahs-merdeka.herokuapp.com/api/v1';
+
+// link: https://ahs-merdeka.herokuapp.com/api/v1
 
 export const get = async (path, success = () => {}, error = () => {}) => {
     try {
@@ -22,6 +24,7 @@ export const get = async (path, success = () => {}, error = () => {}) => {
             error(resp.data);
         }
     } catch (err) {
+        console.log(err.response)
         if (
             err.response &&
             err.response.data &&
@@ -149,6 +152,7 @@ export const put = async (
             error(resp.data);
         }
     } catch (err) {
+        console.log(err.response)
         if (
             err.response &&
             err.response.data &&

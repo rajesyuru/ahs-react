@@ -3,6 +3,8 @@ import { addAlert } from '../../redux/actions/alert';
 import { withRouter, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { getProducts } from '../../redux/actions/product';
+import { formatPrice } from '../../utilities';
+import ModifyingButtons from '../../components/ModifyingButtons';
 
 const GetProducts = ({ history, alert, user, getProducts, product }) => {
     const [products, setProducts] = useState([]);
@@ -15,15 +17,18 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
     const [loading, setLoading] = useState(true);
     const [totalProduct, setTotalProduct] = useState(1);
     const [auth, setAuth] = useState(false);
-    const [limit, setLimit] = useState(10);
-
-    const numberWithCommas = (x) => {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
+    const [editing, setEditing] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
-        getProducts(page, limit);
-    }, [limit]);
+        getProducts(page);
+    }, [page]);
+
+    useEffect(() => {
+        if (product === null) {
+            getProducts(page);
+        }
+    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -45,7 +50,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
         }
 
         if (product === null) {
-            getProducts(page, limit);
+            getProducts(page);
         } else {
             const { data, totalPage, totalData } = product;
 
@@ -68,7 +73,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                 setProducts(data);
             }
         }
-    }, [page, history.location, product, products, limit]);
+    }, [page, history.location, product, products]);
 
     const activePage = (p) => {
         if (loading) {
@@ -96,24 +101,30 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
         }
     };
 
+    const editingButton = () => {
+        setEditing(true);
+        setDeleting(false);
+    };
+
+    const deletingButton = () => {
+        setEditing(false);
+        setDeleting(true);
+    };
+
+    const cancelButton = (
+        <button
+            className="btn btn-secondary"
+            onClick={() => {
+                setDeleting(false);
+                setEditing(false);
+            }}
+        >
+            Cancel
+        </button>
+    );
+
     return (
         <div className="container-fluid">
-            <div className="form-inline my-2">
-                <label htmlFor="number" className="mr-2">
-                    Show entries:
-                </label>
-                <select
-                    id="number"
-                    className="form-control form-control-sm"
-                    onChange={(e) => setLimit(e.target.value)}
-                    defaultValue={10}
-                >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={15}>15</option>
-                    <option value={20}>20</option>
-                </select>
-            </div>
             <table className={`table table-striped table-bordered mb-0`}>
                 <thead>
                     <tr>
@@ -128,32 +139,59 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                         <tr key={product.id} className={d}>
                             <td>{product.id}</td>
                             <td>{product.name}</td>
-                            <td>{`Rp. ${numberWithCommas(product.price)}`}</td>
+                            <td>{`Rp. ${formatPrice(product.price)}`}</td>
                             <td className="d-flex justify-content-between">
                                 {product.owner.name}
-                                {auth ? (
-                                    <Link
-                                        to={`/products/edit?id=${product.id}&name=${product.name}&price=${product.price}`}
-                                    >
-                                        <span
-                                            className={`material-icons align-middle`}
-                                            style={{ marginBottom: 2 }}
-                                        >
-                                            edit
-                                        </span>
-                                    </Link>
-                                ) : null}
+                                {auth && (
+                                    <Fragment>
+                                        {editing && (
+                                            <Link
+                                                to={`/products/edit?id=${product.id}`}
+                                            >
+                                                <span
+                                                    className={`material-icons align-middle`}
+                                                    style={{ marginBottom: 2 }}
+                                                >
+                                                    edit
+                                                </span>
+                                            </Link>
+                                        )}
+                                        {deleting && (
+                                            <span
+                                                className={`material-icons align-middle text-danger`}
+                                                style={{ marginBottom: 2, userSelect: 'none', cursor: 'pointer' }}
+                                                
+                                            >
+                                                delete
+                                            </span>
+                                        )}
+                                    </Fragment>
+                                )}
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
             {auth && (
-                <Link className="m-0" to="/products/add">
-                    <span className="material-icons" style={{ fontSize: 30 }}>
-                        add_box
-                    </span>
-                </Link>
+                <div className="d-flex justify-content-between">
+                    <Link className="m-0" to="/products/add">
+                        <span
+                            className="material-icons"
+                            style={{ fontSize: 30 }}
+                        >
+                            add_box
+                        </span>
+                    </Link>
+                    {!deleting && !editing ? (
+                        <ModifyingButtons
+                            editingButton={editingButton}
+                            deletingButton={deletingButton}
+                        />
+                    ) : null}
+                    {editing || deleting ? (
+                        <div className="mt-1">{cancelButton}</div>
+                    ) : null}
+                </div>
             )}
 
             <p className="font-weight-bold">Total: {totalProduct}</p>
@@ -196,7 +234,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message) => dispatch(addAlert(message)),
-    getProducts: (page, limit) => dispatch(getProducts(page, limit)),
+    getProducts: (page) => dispatch(getProducts(page)),
 });
 
 const mapStateToProps = (state) => ({

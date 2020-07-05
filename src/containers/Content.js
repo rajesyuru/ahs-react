@@ -9,6 +9,7 @@ import Product from './Product';
 import Login from './Login';
 import Merchant from './Merchant';
 import Transaction from './Transaction';
+import Stocks from './Stocks';
 
 const Content = ({ user }) => {
     return (
@@ -20,6 +21,7 @@ const Content = ({ user }) => {
                     <Route path="/products" component={Product} />
                     <Route path="/merchants" component={Merchant} />
                     <Route path="/transactions" component={Transaction} />
+                    <Route path="/stocks" component={Stocks} />
                 </Fragment>
             ) : (
                 <Route path="/" exact component={Login} />

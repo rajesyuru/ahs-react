@@ -1,6 +1,6 @@
 import { post, get } from "../../axios";
 import { addAlert } from "./alert";
-import { USER_SET, USER_REMOVE, PRODUCT_REMOVE, TRANSACTION_REMOVE } from "../actionTypes";
+import { USER_SET, USER_REMOVE, PRODUCT_REMOVE, TRANSACTION_REMOVE, STOCK_STAT_REMOVE_ALL } from "../actionTypes";
 
 export const login = (email, password) => (dispatch) => {
     post(
@@ -44,4 +44,5 @@ export const logout = () => (dispatch) => {
     dispatch({ type: USER_REMOVE });
     dispatch({ type: PRODUCT_REMOVE });
     dispatch({ type: TRANSACTION_REMOVE });
+    dispatch({type: STOCK_STAT_REMOVE_ALL})
 };

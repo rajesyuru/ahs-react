@@ -15,7 +15,7 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
     const [d, setD] = useState('d-none');
     const [paging, setPaging] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [totalProduct, setTotalProduct] = useState(1);
+    const [totalProduct, setTotalProduct] = useState(0);
     const [auth, setAuth] = useState(false);
     const [editing, setEditing] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -123,6 +123,33 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
         </button>
     );
 
+    const editAndDeleteButtonOnTableRow = (
+        <Fragment>
+            {editing && (
+                <Link to={`/products/edit?id=${product.id}`}>
+                    <span
+                        className={`material-icons align-middle`}
+                        style={{ marginBottom: 2 }}
+                    >
+                        edit
+                    </span>
+                </Link>
+            )}
+            {deleting && (
+                <span
+                    className={`material-icons align-middle text-danger`}
+                    style={{
+                        marginBottom: 2,
+                        userSelect: 'none',
+                        cursor: 'pointer',
+                    }}
+                >
+                    delete
+                </span>
+            )}
+        </Fragment>
+    );
+
     return (
         <div className="container-fluid">
             <table className={`table table-hover table-bordered mb-0`}>
@@ -131,45 +158,30 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                         <th scope="col">ID</th>
                         <th scope="col">Product Name</th>
                         <th scope="col">Price</th>
-                        <th scope="col">Merchant</th>
+                        <th scope="col">Buying Price</th>
+                        {!auth && (
+                            <th scope="col">Merchant</th>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
-                    {products && products.map((product) => (
-                        <tr key={product.id} className={d}>
-                            <td>{product.id}</td>
-                            <td>{product.name}</td>
-                            <td>{`Rp. ${formatPrice(product.price)}`}</td>
-                            <td className="d-flex justify-content-between">
-                                {product.owner.name}
-                                {auth && (
-                                    <Fragment>
-                                        {editing && (
-                                            <Link
-                                                to={`/products/edit?id=${product.id}`}
-                                            >
-                                                <span
-                                                    className={`material-icons align-middle`}
-                                                    style={{ marginBottom: 2 }}
-                                                >
-                                                    edit
-                                                </span>
-                                            </Link>
-                                        )}
-                                        {deleting && (
-                                            <span
-                                                className={`material-icons align-middle text-danger`}
-                                                style={{ marginBottom: 2, userSelect: 'none', cursor: 'pointer' }}
-                                                
-                                            >
-                                                delete
-                                            </span>
-                                        )}
-                                    </Fragment>
+                    {products &&
+                        products.map((product) => (
+                            <tr key={product.id} className={d}>
+                                <td>{product.id}</td>
+                                <td>{product.name}</td>
+                                <td>{`Rp. ${formatPrice(product.price)}`}</td>
+                                <td className={auth && 'd-flex justify-content-between'}>{`Rp. ${formatPrice(
+                                    product.buying_price
+                                )}`} {auth ? editAndDeleteButtonOnTableRow : null}</td>
+                                {!auth && (
+                                    <td className="d-flex justify-content-between">
+                                    {product.owner.name}
+                                    {editAndDeleteButtonOnTableRow}
+                                </td>
                                 )}
-                            </td>
-                        </tr>
-                    ))}
+                            </tr>
+                        ))}
                 </tbody>
             </table>
             {auth && (

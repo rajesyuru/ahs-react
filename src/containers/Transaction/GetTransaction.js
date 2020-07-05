@@ -218,7 +218,7 @@ const GetTransaction = ({
                                 </td>
                                 <td>{tran.quantity}</td>
                                 <td className="d-flex justify-content-between">
-                                    Rp. {formatPrice(tran.price)}
+                                    Rp. {formatPrice(tran.type === 'sell' ? tran.price : tran.buying_price)}
                                     {auth && editing && (
                                         <Link
                                             to={`/transactions/edit?id=${tran.id}`}

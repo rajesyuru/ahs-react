@@ -53,7 +53,7 @@ const EditTransaction = ({ alert, history }) => {
                         const item = data[0];
                         setDate(new Date(item.date));
                         setProductId(item.product_id);
-                        setQuantity(item.quantity);
+                        setQuantity(item.quantity * 1);
                         setType(item.type);
                         if (item.info) {
                             setInfo(item.info)

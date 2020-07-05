@@ -17,7 +17,7 @@ const TransactionForm = ({
     stateDate,
     stateSelected = '',
     stateProduct = [],
-    stateQuantity = '',
+    stateQuantity = 1,
     stateType = '',
     stateInfo = '',
     action,
@@ -25,7 +25,7 @@ const TransactionForm = ({
 }) => {
     const [date, setDate] = useState(new Date());
     const [selected, setSelected] = useState('');
-    const [quantity, setQuantity] = useState('');
+    const [quantity, setQuantity] = useState(1);
     const [type, setType] = useState('');
     const [info, setInfo] = useState('');
     const [maxInfo, setMaxInfo] = useState(stateInfo.length ? 150 - stateInfo.length : 150);
@@ -72,6 +72,7 @@ const TransactionForm = ({
                     className="form-control"
                     placeholderText="--Pilih tanggal--"
                     disabledKeyboardNavigation
+                    maxDate={new Date()}
                     todayButton={`Hari ini (${moment(new Date()).format(
                         'DD MMMM'
                     )})`}
@@ -144,7 +145,7 @@ const TransactionForm = ({
                     className="form-control w-25"
                     id="quantity"
                     min="0"
-                    value={quantity ? quantity : 1}
+                    value={`${quantity}`}
                     onChange={(e) => setQuantity(e.target.value)}
                 />
             </div>

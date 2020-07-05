@@ -9,20 +9,9 @@ const ProductStock = ({ alert, product_name, product_id }) => {
 
     useEffect(() => {
         get(
-            `/transactions?product_id=${product_id}`,
-            ({ data }) => {
-                let buys = [];
-                let sells = [];
-                data.map((tran) => {
-                    if (tran.type === 'buy') {
-                        buys.push(tran.quantity);
-                    } else if (tran.type === 'sell') {
-                        sells.push(tran.quantity);
-                    }
-                });
-                const buysSum = buys.reduce((a, b) => a + b, 0);
-                const sellsSum = sells.reduce((a, b) => a + b, 0);
-                setAmmount(buysSum - sellsSum);
+            `/transactions/stocks?product_id=${product_id}`,
+            ({ stocks }) => {
+                setAmmount(stocks)
             },
             (error) => {
                 alert('Telah terjadi kesalahan');

@@ -8,6 +8,8 @@ import id from 'date-fns/locale/id';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
 import 'moment/locale/id';
+import { setLoading } from '../redux/actions/loading';
+import { get } from '../axios';
 
 registerLocale('id', id);
 
@@ -16,19 +18,27 @@ const TransactionForm = ({
     loading,
     stateDate,
     stateSelected = '',
-    stateProduct = [],
+    stateSelectedCustomer = '',
     stateQuantity = 1,
     stateType = '',
     stateInfo = '',
     action,
     alert,
+    history,
+    customer,
+    setLoading,
 }) => {
     const [date, setDate] = useState(new Date());
     const [selected, setSelected] = useState('');
+    const [selectedCustomer, setSelectedCustomer] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [type, setType] = useState('');
     const [info, setInfo] = useState('');
-    const [maxInfo, setMaxInfo] = useState(stateInfo.length ? 150 - stateInfo.length : 150);
+    const [maxInfo, setMaxInfo] = useState(
+        stateInfo.length ? 150 - stateInfo.length : 150
+    );
+    const [owned, setOwned] = useState([]);
+    const [ownedCustomers, setOwnedCustomers] = useState([]);
 
     useEffect(() => {
         setDate(stateDate);
@@ -36,7 +46,46 @@ const TransactionForm = ({
         setSelected(`${stateSelected}`);
         setType(stateType);
         setInfo(stateInfo);
-    }, [stateDate, stateQuantity, stateSelected, stateType, stateInfo]);
+        setSelectedCustomer(stateSelectedCustomer);
+    }, [
+        stateDate,
+        stateQuantity,
+        stateSelected,
+        stateType,
+        stateInfo,
+        stateSelectedCustomer,
+    ]);
+
+    useEffect(() => {
+        setLoading(true);
+        get(
+            '/products',
+            ({ data }) => {
+                if (!data.length > 0) {
+                    history.push('/transactions/get');
+                    return alert('Anda belum memiliki produk');
+                }
+                setOwned(data);
+                get(
+                    `/customers?limit=${customer.totalData}`,
+                    ({ data }) => {
+                        setOwnedCustomers(data);
+                        setLoading(false);
+                    },
+                    (error) => {
+                        history.push('/transactions/get');
+                        alert('Telah terjadi kesalahan');
+                        setLoading(false);
+                    }
+                );
+            },
+            (error) => {
+                history.push('/transactions/get');
+                alert('Telah terjadi kesalahan');
+                setLoading(false);
+            }
+        );
+    }, []);
 
     const submitHandler = (e) => {
         e.preventDefault();
@@ -55,12 +104,16 @@ const TransactionForm = ({
             selected * 1,
             type,
             quantity * 1,
-            /\S/.test(info) && info.length > 0 ? info : null
+            /\S/.test(info) && info.length > 0 ? info : null,
+            selectedCustomer
         );
     };
 
     return (
-        <form onSubmit={submitHandler} className="mt-2">
+        <form
+            onSubmit={submitHandler}
+            className={`mt-2 ${loading && 'd-none'}`}
+        >
             <div className="form-group">
                 <label htmlFor="date" className="d-block">
                     Tanggal:
@@ -92,7 +145,7 @@ const TransactionForm = ({
                     <option value="" disabled>
                         --Pilih produk--
                     </option>
-                    {stateProduct.map((product) => (
+                    {owned.map((product) => (
                         <option key={product.id} value={product.id}>
                             {product.name}
                         </option>
@@ -149,31 +202,70 @@ const TransactionForm = ({
                     onChange={(e) => setQuantity(e.target.value)}
                 />
             </div>
+            <div className="form-group">
+                <label htmlFor="product">Pelanggan:</label>
+                <select
+                    id="product"
+                    className="form-control"
+                    onChange={(e) => {
+                        setSelectedCustomer(e.target.value);
+                    }}
+                    value={selectedCustomer}
+                >
+                    <option value="" disabled>
+                        --Pilih pelanggan--
+                    </option>
+                    {ownedCustomers.map((customer) => (
+                        <option key={customer.id} value={customer.id}>
+                            {customer.name} (Telepon: {customer.phone})
+                        </option>
+                    ))}
+                </select>
+            </div>
             <div>
-                        <label htmlFor="info">Info tambahan ({`${maxInfo}`}):</label>
+                <label htmlFor="info">Info tambahan ({`${maxInfo}`}):</label>
                 <textarea
                     className="form-control mb-4"
                     id="info"
                     rows="2"
                     maxLength="150"
                     value={info}
-                    onChange={(e) => {setInfo(e.target.value); setMaxInfo(150 - e.target.value.length)}}
+                    onChange={(e) => {
+                        setInfo(e.target.value);
+                        setMaxInfo(150 - e.target.value.length);
+                    }}
                     placeholder={`--Tambahkan info/catatan khusus untuk transaksi ini (contoh: 'Belum dibayar')-- `}
                 />
             </div>
-            <button
-                type="submit"
-                className={`btn btn-primary ${loading ? 'disabled' : ''}`}
-                disabled={loading}
-            >
-                {action ? action : 'Submit'}
-            </button>
+            <div className="d-flex">
+                <button
+                    type="submit"
+                    className={`btn btn-primary mr-2 ${loading && 'disabled'}`}
+                    disabled={loading}
+                >
+                    {action ? action : 'Submit'}
+                </button>
+                <button
+                    type="button"
+                    className={`btn btn-secondary ${loading && 'disabled'}`}
+                    disabled={loading}
+                    onClick={() => history.goBack()}
+                >
+                    Cancel
+                </button>
+            </div>
         </form>
     );
 };
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message) => dispatch(addAlert(message)),
+    setLoading: (loading) => dispatch(setLoading(loading)),
 });
 
-export default connect(null, mapDispatchToProps)(TransactionForm);
+const mapStateToProps = (state) => ({
+    customer: state.customer,
+    loading: state.loading,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransactionForm);

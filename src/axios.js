@@ -168,3 +168,44 @@ export const put = async (
         }
     }
 };
+
+export const del = async (
+    path,
+    success = () => {},
+    error = () => {}
+) => {
+    try {
+        let config = {};
+
+        let token = localStorage.getItem('token');
+
+        if (token) {
+            config.headers = {
+                Authorization: `Bearer ${token}`,
+            };
+        }
+
+        let resp = await axios.delete(`${baseUrl}${path}`, config)
+
+        if (resp.status === 200) {
+            success(resp.data);
+        } else {
+            error(resp.data);
+        }
+    } catch (err) {
+        console.log(err.response)
+        if (
+            err.response &&
+            err.response.data &&
+            err.response.data.message === 'jwt expired'
+        ) {
+            // refresh token
+            await refreshToken();
+
+            // re-run
+            await del(path, success, error);
+        } else {
+            error(err.response && err.response.data);
+        }
+    }
+};

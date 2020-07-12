@@ -167,11 +167,11 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
                 <tbody>
                     {products &&
                         products.map((product) => (
-                            <tr key={product.id} className={d}>
+                            <tr key={product.id} className={`${d}`}>
                                 <td>{product.id}</td>
                                 <td>{product.name}</td>
                                 <td>{`Rp. ${formatPrice(product.price)}`}</td>
-                                <td className={auth && 'd-flex justify-content-between'}>{`Rp. ${formatPrice(
+                                <td className={auth ? 'd-flex justify-content-between' : null}>{`Rp. ${formatPrice(
                                     product.buying_price
                                 )}`} {auth ? editAndDeleteButtonOnTableRow : null}</td>
                                 {!auth && (

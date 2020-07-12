@@ -36,6 +36,12 @@ function NavBar({ user, logout, history }) {
         history.push('/transactions/get');
     };
 
+    const customerHandler = (e) => {
+        e.preventDefault();
+
+        history.push('/customers/get');
+    };
+
     const home = (e) => {
         e.preventDefault();
 
@@ -121,6 +127,22 @@ function NavBar({ user, logout, history }) {
                         </li>
                     )}
 
+                    {user.group_id === 1 && (
+                        <li
+                            className={`nav-item ${activeLink(
+                                '/customers/get'
+                            )}`}
+                        >
+                            <a
+                                className="nav-link"
+                                href="#"
+                                onClick={customerHandler}
+                            >
+                                Customers
+                            </a>
+                        </li>
+                    )}
+
                     <li className="nav-item">
                         <a
                             className="nav-link"
@@ -136,7 +158,7 @@ function NavBar({ user, logout, history }) {
     );
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-primary w-100">
             <Link className="navbar-brand" to="/">
                 AHS
             </Link>

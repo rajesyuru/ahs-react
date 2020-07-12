@@ -1,20 +1,27 @@
-import { post, get } from "../../axios";
-import { addAlert } from "./alert";
-import { USER_SET, USER_REMOVE, PRODUCT_REMOVE, TRANSACTION_REMOVE, STOCK_STAT_REMOVE_ALL } from "../actionTypes";
+import { post, get } from '../../axios';
+import { addAlert } from './alert';
+import {
+    USER_SET,
+    USER_REMOVE,
+    PRODUCT_REMOVE,
+    TRANSACTION_REMOVE,
+    STOCKS_REMOVE,
+    CUSTOMER_REMOVE
+} from '../actionTypes';
 
 export const login = (email, password) => (dispatch) => {
     post(
-        "/auth/login",
+        '/auth/login',
         {
             email,
             password,
         },
         (success) => {
-            localStorage.setItem("token", success.token);
-            localStorage.setItem("refreshToken", success.refreshToken);
-            
+            localStorage.setItem('token', success.token);
+            localStorage.setItem('refreshToken', success.refreshToken);
+
             get(
-                "/auth/me",
+                '/auth/me',
                 ({ data }) => {
                     dispatch({
                         type: USER_SET,
@@ -28,7 +35,7 @@ export const login = (email, password) => (dispatch) => {
                     });
                 },
                 (error) => {
-                    dispatch(addAlert("Telah terjadi kesalahan"));
+                    dispatch(addAlert('Telah terjadi kesalahan'));
                 }
             );
         },
@@ -39,10 +46,11 @@ export const login = (email, password) => (dispatch) => {
 };
 
 export const logout = () => (dispatch) => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     dispatch({ type: USER_REMOVE });
     dispatch({ type: PRODUCT_REMOVE });
     dispatch({ type: TRANSACTION_REMOVE });
-    dispatch({type: STOCK_STAT_REMOVE_ALL})
+    dispatch({ type: STOCKS_REMOVE });
+    dispatch({ type: CUSTOMER_REMOVE });
 };

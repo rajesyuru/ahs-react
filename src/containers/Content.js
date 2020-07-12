@@ -10,6 +10,7 @@ import Login from './Login';
 import Merchant from './Merchant';
 import Transaction from './Transaction';
 import Stocks from './Stocks';
+import Customer from './Customer';
 
 const Content = ({ user }) => {
     return (
@@ -22,6 +23,7 @@ const Content = ({ user }) => {
                     <Route path="/merchants" component={Merchant} />
                     <Route path="/transactions" component={Transaction} />
                     <Route path="/stocks" component={Stocks} />
+                    <Route path="/customers" component={Customer} />
                 </Fragment>
             ) : (
                 <Route path="/" exact component={Login} />

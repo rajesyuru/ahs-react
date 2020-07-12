@@ -5,23 +5,6 @@ import GetStocks from './Stocks/GetStocks';
 import { get } from '../axios';
 
 function Home({ user, history }) {
-    const [owned, setOwned] = useState([]);
-
-    useEffect(() => {
-        get(
-            '/products',
-            ({ data }) => {
-                if (!data.length > 0) {
-                    history.push('/products/get');
-                    return alert('Anda belum memiliki produk');
-                }
-                setOwned(data);
-            },
-            (error) => {
-                alert('Telah terjadi kesalahan');
-            }
-        );
-    }, []);
     return (
         <div className="container-fluid">
             {user.merchant_id === null ? (

@@ -10,6 +10,7 @@ import InfoTooltip from '../../components/InfoTooltip';
 import DeleteModal from '../../components/Transaction/DeleteModal';
 import ModifyingButtons from '../../components/ModifyingButtons';
 import { formatPrice } from '../../utilities';
+import CancelButton from '../../components/CancelButton';
 
 const GetTransaction = ({
     alert,
@@ -31,10 +32,6 @@ const GetTransaction = ({
     const [checked, setChecked] = useState(false);
     const [editing, setEditing] = useState(false);
     const [deleting, setDeleting] = useState(false);
-
-    const numberWithCommas = (x) => {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
 
     useEffect(() => {
         getTransaction(page);
@@ -137,18 +134,11 @@ const GetTransaction = ({
         );
     };
 
-    const cancelButton = (
-        <button
-            className="btn btn-secondary"
-            onClick={() => {
-                setDeleting(false);
-                setEditing(false);
-                setSelected([]);
-            }}
-        >
-            Cancel
-        </button>
-    );
+    const cancelHandler = () => {
+        setDeleting(false);
+        setEditing(false);
+        setSelected([]);
+    };
 
     const editingButton = () => {
         setEditing(true);
@@ -170,6 +160,7 @@ const GetTransaction = ({
                         <th scope="col">Type</th>
                         <th scope="col">Quantity</th>
                         <th scope="col">Price</th>
+                        <th scope="col">Customer</th>
                     </tr>
                 </thead>
                 <tbody className={`${d}`}>
@@ -192,13 +183,13 @@ const GetTransaction = ({
                                             e.currentTarget.children[0].children[0].checked = false;
                                             setSelected((prevData) =>
                                                 prevData.filter(
-                                                    (i) =>
-                                                        i !== tran.id * 1
+                                                    (i) => i !== tran.id * 1
                                                 )
                                             );
                                         }
                                     }
-                                }} style={{userSelect: deleting && 'none'}}
+                                }}
+                                style={{ userSelect: deleting && 'none' }}
                             >
                                 <td>
                                     {moment(tran.date).format('LL')}
@@ -208,7 +199,11 @@ const GetTransaction = ({
                                             className="position-absolute mt-2"
                                             id={tran.id}
                                             value={tran.id}
-                                            style={{ left: '3%', userSelect: 'none', pointerEvents: 'none' }}
+                                            style={{
+                                                left: '3%',
+                                                userSelect: 'none',
+                                                pointerEvents: 'none',
+                                            }}
                                         />
                                     )}
                                 </td>
@@ -217,8 +212,16 @@ const GetTransaction = ({
                                     {tran.type === 'sell' ? 'Jual' : 'Beli'}
                                 </td>
                                 <td>{tran.quantity}</td>
+                                <td>
+                                    Rp.{' '}
+                                    {formatPrice(
+                                        tran.type === 'sell'
+                                            ? tran.price
+                                            : tran.buying_price
+                                    )}
+                                </td>
                                 <td className="d-flex justify-content-between">
-                                    Rp. {formatPrice(tran.type === 'sell' ? tran.price : tran.buying_price)}
+                                    {tran.customer.name}
                                     {auth && editing && (
                                         <Link
                                             to={`/transactions/edit?id=${tran.id}`}
@@ -239,7 +242,7 @@ const GetTransaction = ({
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="4">
+                            <td colSpan="6">
                                 Belum ada transaksi, silahkan tambahkan
                                 transaksi
                             </td>
@@ -267,7 +270,9 @@ const GetTransaction = ({
                                 deletingButton={deletingButton}
                             />
                         )}
-                        {editing && <div className="mt-1">{cancelButton}</div>}
+                        {editing && <div className="mt-1">
+                            <CancelButton onClick={cancelHandler} />
+                            </div>}
                     </div>
                     {deleting && (
                         <Fragment>
@@ -284,7 +289,7 @@ const GetTransaction = ({
                             >
                                 Delete
                             </button>
-                            {cancelButton}
+                            <CancelButton onClick={cancelHandler} />
                         </Fragment>
                     )}
                 </Fragment>

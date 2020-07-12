@@ -6,6 +6,7 @@ import TransactionForm from '../../components/TransactionForm';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import 'moment/locale/id';
+import { setLoading } from '../../redux/actions/loading';
 
 const EditTransaction = ({ alert, history }) => {
     const [owned, setOwned] = useState([]);
@@ -17,6 +18,7 @@ const EditTransaction = ({ alert, history }) => {
     const [quantity, setQuantity] = useState('');
     const [info, setInfo] = useState('');
     const [type, setType] = useState('');
+    const [customer, setCustomer] = useState('');
 
     useEffect(() => {
         const search = history.location.search;
@@ -26,7 +28,7 @@ const EditTransaction = ({ alert, history }) => {
         }
 
         const query = search.substring(1);
-        
+
         if (!query.includes('id')) {
             history.push('/transactions/get');
             return alert('Telah terjadi kesalahan');
@@ -39,32 +41,18 @@ const EditTransaction = ({ alert, history }) => {
         }
 
         get(
-            '/products',
+            `/transactions?id=${queryId}`,
             ({ data }) => {
-                if (!data.length > 0) {
-                    history.push('/products/get');
-                    return alert('Anda belum memiliki produk');
+                const item = data[0];
+                setDate(new Date(item.date));
+                setProductId(item.product_id);
+                setQuantity(item.quantity * 1);
+                setType(item.type);
+                if (item.info) {
+                    setInfo(item.info);
                 }
-                setOwned(data);
-                setId(queryId)
-                get(
-                    `/transactions?id=${queryId}`,
-                    ({data}) => {
-                        const item = data[0];
-                        setDate(new Date(item.date));
-                        setProductId(item.product_id);
-                        setQuantity(item.quantity * 1);
-                        setType(item.type);
-                        if (item.info) {
-                            setInfo(item.info)
-                        }
-                        setLoading(false);
-                    },
-                    (error) => {
-                        alert('Telah terjadi kesalahan');
-                        setLoading(false);
-                    }
-                )
+                setCustomer(item.customer.id);
+                setLoading(false);
             },
             (error) => {
                 alert('Telah terjadi kesalahan');
@@ -73,16 +61,24 @@ const EditTransaction = ({ alert, history }) => {
         );
     }, []);
 
-    const onSubmitHandler = (date, product_id, type, quantity, info) => {
+    const onSubmitHandler = (
+        date,
+        product_id,
+        type,
+        quantity,
+        info,
+        customer_id
+    ) => {
         setSubmitting(true);
         put(
-            `/transactions/${id}`,
+            `/transactions/${history.location.search.replace('?id=', '')}`,
             {
                 date,
                 product_id,
                 type,
-                quantity: quantity > 0 ? quantity : 0,
-                info
+                quantity,
+                info,
+                customer_id,
             },
             (success) => {
                 setSubmitting(false);
@@ -93,9 +89,9 @@ const EditTransaction = ({ alert, history }) => {
                 setSubmitting(false);
                 alert('Telah terjadi kesalahan');
             }
-        )
+        );
     };
-    return !loading ? (
+    return (
         <TransactionForm
             stateProduct={owned}
             loading={submitting}
@@ -105,15 +101,16 @@ const EditTransaction = ({ alert, history }) => {
             stateQuantity={quantity}
             stateInfo={info}
             stateType={type}
+            stateSelectedCustomer={customer}
             onSubmit={onSubmitHandler}
+            history={history}
         />
-    ) : (
-        <div></div>
     );
 };
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message, type) => dispatch(addAlert(message, type)),
+    setLoading: (loading) => dispatch(setLoading(loading)),
 });
 
 export default connect(null, mapDispatchToProps)(EditTransaction);

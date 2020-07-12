@@ -1,33 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { get, postWithAuth } from '../../axios';
 import { addAlert } from '../../redux/actions/alert';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import TransactionForm from '../../components/TransactionForm';
 import { connect } from 'react-redux';
 
 const AddTransaction = ({ alert, history }) => {
-    const [owned, setOwned] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        get(
-            '/products',
-            ({ data }) => {
-                if (!data.length > 0) {
-                    history.push('/products/get');
-                    return alert('Anda belum memiliki produk');
-                }
-                setOwned(data);
-                setLoading(false);
-            },
-            (error) => {
-                alert('Telah terjadi kesalahan');
-            }
-        );
-    }, []);
-
-    const onSubmitHandler = (date, product_id, type, quantity, info) => {
+    const onSubmitHandler = (
+        date,
+        product_id,
+        type,
+        quantity,
+        info,
+        customer_id
+    ) => {
         setSubmitting(true);
         postWithAuth(
             '/transactions',
@@ -36,7 +24,8 @@ const AddTransaction = ({ alert, history }) => {
                 product_id,
                 type,
                 quantity,
-                info
+                info,
+                customer_id,
             },
             (success) => {
                 setSubmitting(false);
@@ -49,14 +38,12 @@ const AddTransaction = ({ alert, history }) => {
             }
         );
     };
-    return !loading ? (
+    return (
         <TransactionForm
-            stateProduct={owned}
             loading={submitting}
             onSubmit={onSubmitHandler}
+            history={history}
         />
-    ) : (
-        <div></div>
     );
 };
 

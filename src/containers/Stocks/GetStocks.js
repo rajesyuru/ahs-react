@@ -10,20 +10,14 @@ const GetStocks = ({ stock, getStocks, loading }) => {
     const [owned, setOwned] = useState([]);
 
     useEffect(() => {
-        if (!stock) {
-            getStocks()
-        } else {
-            setOwned(stock.data)
-        }
-        
-        console.log(owned)
-    }, [stock, owned]);
+        getStocks()
+    }, []);
 
     return (
         <div className="container">
             <div className="row row-cols-md-5">
                 {!loading ? <Fragment>
-                    {owned.map((own) => 
+                    {stock && stock.data.map((own) => 
                         <ProductStock key={own.product_id} product_name={own.name} stock={own.stock} />
                     )}
                 </Fragment> : null }

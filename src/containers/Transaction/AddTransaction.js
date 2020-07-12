@@ -17,6 +17,7 @@ const AddTransaction = ({ alert, history }) => {
         customer_id
     ) => {
         setSubmitting(true);
+        console.log(customer_id, type)
         postWithAuth(
             '/transactions',
             {
@@ -26,7 +27,7 @@ const AddTransaction = ({ alert, history }) => {
                 quantity,
                 info,
                 customer_id,
-            },
+            }, 
             (success) => {
                 setSubmitting(false);
                 alert('Transaksi berhasil ditambahkan', 'success');
@@ -37,6 +38,7 @@ const AddTransaction = ({ alert, history }) => {
                 alert('Telah terjadi kesalahan');
             }
         );
+        
     };
     return (
         <TransactionForm

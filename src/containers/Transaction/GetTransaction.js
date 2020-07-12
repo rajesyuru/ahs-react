@@ -221,7 +221,7 @@ const GetTransaction = ({
                                     )}
                                 </td>
                                 <td className="d-flex justify-content-between">
-                                    {tran.customer.name}
+                                    {tran.customer ? tran.customer.name : '~'}
                                     {auth && editing && (
                                         <Link
                                             to={`/transactions/edit?id=${tran.id}`}

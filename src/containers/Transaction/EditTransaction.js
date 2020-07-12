@@ -26,22 +26,21 @@ const EditTransaction = ({ alert, history }) => {
             history.push('/transactions/get');
             return alert('Telah terjadi kesalahan');
         }
-
-        const query = search.substring(1);
-
-        if (!query.includes('id')) {
+        
+        if (!search.includes('id')) {
             history.push('/transactions/get');
             return alert('Telah terjadi kesalahan');
         }
-        const queryId = query.split('&')[0].substring(3);
 
-        if (!queryId.match(/^\d+$/)) {
+        const query = search.replace('?id=', '');
+
+        if (!query.match(/^\d+$/)) {
             history.push('/transactions/get');
             return alert('Telah terjadi kesalahan');
         }
 
         get(
-            `/transactions?id=${queryId}`,
+            `/transactions?id=${query}`,
             ({ data }) => {
                 const item = data[0];
                 setDate(new Date(item.date));
@@ -51,7 +50,7 @@ const EditTransaction = ({ alert, history }) => {
                 if (item.info) {
                     setInfo(item.info);
                 }
-                setCustomer(item.customer.id);
+                setCustomer(item.customer ? `${item.customer.id}` : '');
                 setLoading(false);
             },
             (error) => {
@@ -79,7 +78,7 @@ const EditTransaction = ({ alert, history }) => {
                 quantity,
                 info,
                 customer_id,
-            },
+            }, 
             (success) => {
                 setSubmitting(false);
                 alert('Transaksi berhasil diedit', 'success');

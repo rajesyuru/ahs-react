@@ -20,7 +20,7 @@ const TransactionForm = ({
     stateSelected = '',
     stateSelectedCustomer = '',
     stateQuantity = 1,
-    stateType = '',
+    stateType = 'sell',
     stateInfo = '',
     action,
     alert,
@@ -67,7 +67,7 @@ const TransactionForm = ({
                 }
                 setOwned(data);
                 get(
-                    `/customers?limit=${customer.totalData}`,
+                    `/customers`,
                     ({ data }) => {
                         setOwnedCustomers(data);
                         setLoading(false);
@@ -99,13 +99,20 @@ const TransactionForm = ({
         } else if (!type.length > 0) {
             return alert('Jenis transaksi perlu dipilih');
         }
+
+        if (selectedCustomer !== undefined) {
+            if (type === 'sell' && !selectedCustomer.length > 0) {
+                return alert('Pelanggan perlu dipilih');
+            }
+        }
+
         onSubmit(
             today,
             selected * 1,
             type,
             quantity * 1,
             /\S/.test(info) && info.length > 0 ? info : null,
-            selectedCustomer
+            selectedCustomer ? selectedCustomer : null
         );
     };
 
@@ -166,6 +173,7 @@ const TransactionForm = ({
                             onChange={(e) => {
                                 if (e.target.checked) {
                                     setType(e.target.value);
+                                    setSelectedCustomer(undefined);
                                 }
                             }}
                         />
@@ -182,6 +190,7 @@ const TransactionForm = ({
                             onChange={(e) => {
                                 if (e.target.checked) {
                                     setType(e.target.value);
+                                    setSelectedCustomer('');
                                 }
                             }}
                         />
@@ -202,13 +211,13 @@ const TransactionForm = ({
                     onChange={(e) => setQuantity(e.target.value)}
                 />
             </div>
-            <div className="form-group">
+            <div className={`form-group ${type === 'buy' && 'd-none'}`}>
                 <label htmlFor="product">Pelanggan:</label>
                 <select
                     id="product"
                     className="form-control"
                     onChange={(e) => {
-                        setSelectedCustomer(e.target.value);
+                        setSelectedCustomer(`${e.target.value}`);
                     }}
                     value={selectedCustomer}
                 >

@@ -24,7 +24,7 @@ export const get = async (path, success = () => {}, error = () => {}) => {
             error(resp.data);
         }
     } catch (err) {
-        console.log(err.response)
+        console.log(err)
         if (
             err.response &&
             err.response.data &&

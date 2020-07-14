@@ -5,12 +5,11 @@ import { connect } from 'react-redux';
 import { getTransactions } from '../../redux/actions/transaction';
 import moment from 'moment';
 import 'moment/locale/id';
-import { put } from '../../axios';
+import { del } from '../../axios';
 import InfoTooltip from '../../components/InfoTooltip';
-import DeleteModal from '../../components/Transaction/DeleteModal';
-import ModifyingButtons from '../../components/ModifyingButtons';
-import { formatPrice } from '../../utilities';
-import CancelButton from '../../components/CancelButton';
+import { formatPrice, checkAdminMerchant } from '../../utilities';
+import DeleteModal from '../../components/DeleteModal';
+import { setLoading } from '../../redux/actions/loading';
 
 const GetTransaction = ({
     alert,
@@ -18,71 +17,49 @@ const GetTransaction = ({
     transaction,
     history,
     user,
+    loading,
+    setLoading,
 }) => {
-    const [transactions, setTransactions] = useState([]);
-    const [page, setPage] = useState(
-        history.location.search ? history.location.search.substring(6) * 1 : 1
-    );
-    const [totalPage, setTotal] = useState(1);
-    const [d, setD] = useState('d-none');
-    const [paging, setPaging] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [auth, setAuth] = useState(false);
-    const [selected, setSelected] = useState([]);
-    const [checked, setChecked] = useState(false);
-    const [editing, setEditing] = useState(false);
-    const [deleting, setDeleting] = useState(false);
+    const [page, setPage] = useState(1);
+    const [totalPage, setTotalPage] = useState([]);
+    const [delId, setDelId] = useState(-1);
 
     useEffect(() => {
         getTransaction(page);
-    }, []);
+    }, [page]);
 
-    const loadDataToPage = () => {
-        if (!transaction) {
-            getTransaction(page);
+    useEffect(() => {
+        if (loading) {
+            setTotalPage(() => {
+                let a = [];
+                for (
+                    let i = 1;
+                    i <= (transaction ? transaction.totalPage : 1);
+                    i++
+                ) {
+                    a.push(i);
+                }
+                return a;
+            });
+        }
+    }, [transaction]);
+
+    const activeNav = (type) => {
+        if (loading) {
+            return 'disabled';
+        }
+        if (type === 'prev') {
+            if (page === 1) {
+                return 'disabled';
+            }
         } else {
-            const { data, totalPage, totalData } = transaction;
-
-            if (transactions && transactions.length !== 0) {
-                setTransactions(data);
-                setInterval(() => {
-                    setLoading(false);
-                    setD(() => '');
-                }, 1000);
-                setTotal(totalPage);
-                setPaging(() => {
-                    let a = [];
-                    for (let i = 1; i <= totalPage; i++) {
-                        a.push(i);
-                    }
-                    return a;
-                });
-            } else {
-                setTransactions(data);
+            if (!transaction || transaction.totalPage < 1) {
+                return 'disabled';
+            } else if (page === transaction.totalPage) {
+                return 'disabled';
             }
         }
     };
-
-    useEffect(() => {
-        setLoading(true);
-        const search = history.location.search.substring(1);
-        if (
-            !search.includes('page') &&
-            history.location.pathname === '/transactions/get'
-        ) {
-            if (page !== 1) {
-                history.push(`/transactions/get?page=${page}`);
-            }
-        } else {
-            setPage(search.substring(5) * 1);
-        }
-
-        if (user.merchant_id !== null && user.group_id === 1) {
-            setAuth(true);
-        }
-
-        loadDataToPage();
-    }, [page, history.location, transaction, transactions]);
 
     const activePage = (p) => {
         if (loading) {
@@ -95,64 +72,41 @@ const GetTransaction = ({
         }
     };
 
-    const activeNav = (type) => {
-        if (loading) {
-            return 'disabled';
-        }
-        if (type === 'prev') {
-            if (page === 1) {
-                return 'disabled';
-            }
-        } else {
-            if (page === totalPage) {
-                return 'disabled';
-            }
-        }
-    };
-
     const deleteData = () => {
-        setD('d-none');
         setLoading(true);
-        put(
-            '/transactions',
-            {
-                ids: selected,
-            },
+        if (delId < 0) {
+            setLoading(false);
+            return alert('Telah terjadi kesalahan');
+        }
+        del(
+            `/transactions/${delId}`,
             (success) => {
-                getTransaction(page);
                 alert('Data berhasil dihapus', 'success');
-                loadDataToPage();
-                setD('');
+                getTransaction(page);
                 setLoading(false);
-                setSelected([]);
-                setDeleting(false);
-                setEditing(false);
+                setDelId(-1);
             },
             (error) => {
                 alert('Telah terjadi kesalahan');
+                getTransaction(page);
+                setLoading(false);
+                setDelId(-1);
             }
         );
     };
 
-    const cancelHandler = () => {
-        setDeleting(false);
-        setEditing(false);
-        setSelected([]);
-    };
-
-    const editingButton = () => {
-        setEditing(true);
-        setDeleting(false);
-    };
-
-    const deletingButton = () => {
-        setEditing(false);
-        setDeleting(true);
-    };
-
     return (
-        <div className={`container-fluid ${deleting && 'pl-5'}`}>
-            <table className={`table table-hover table-bordered mb-0`}>
+        <div className="container-fluid">
+            <Link
+                className={`btn btn-primary mb-2 p-2 ${
+                    checkAdminMerchant(user) ? '' : 'disabled'
+                }`}
+                to="/transactions/add"
+            >
+                Add Transaction
+                <span className="material-icons align-middle ml-1">add</span>
+            </Link>
+            <table className="table table-hover table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">Date</th>
@@ -161,52 +115,18 @@ const GetTransaction = ({
                         <th scope="col">Quantity</th>
                         <th scope="col">Price</th>
                         <th scope="col">Customer</th>
+                        {checkAdminMerchant(user) ? (
+                            <th scope="col" className="text-center">
+                                Actions
+                            </th>
+                        ) : null}
                     </tr>
                 </thead>
-                <tbody className={`${d}`}>
-                    {transactions && transactions.length > 0 ? (
-                        transactions.map((tran) => (
-                            <tr
-                                key={tran.id}
-                                onClick={(e) => {
-                                    if (deleting) {
-                                        if (
-                                            !e.currentTarget.children[0]
-                                                .children[0].checked
-                                        ) {
-                                            e.currentTarget.children[0].children[0].checked = true;
-                                            setSelected((prevData) => [
-                                                ...prevData,
-                                                tran.id * 1,
-                                            ]);
-                                        } else {
-                                            e.currentTarget.children[0].children[0].checked = false;
-                                            setSelected((prevData) =>
-                                                prevData.filter(
-                                                    (i) => i !== tran.id * 1
-                                                )
-                                            );
-                                        }
-                                    }
-                                }}
-                                style={{ userSelect: deleting && 'none' }}
-                            >
-                                <td>
-                                    {moment(tran.date).format('LL')}
-                                    {deleting && (
-                                        <input
-                                            type="checkbox"
-                                            className="position-absolute mt-2"
-                                            id={tran.id}
-                                            value={tran.id}
-                                            style={{
-                                                left: '3%',
-                                                userSelect: 'none',
-                                                pointerEvents: 'none',
-                                            }}
-                                        />
-                                    )}
-                                </td>
+                <tbody className={`${loading ? 'd-none' : ''}`}>
+                    {transaction && transaction.data.length > 0 ? (
+                        transaction.data.map((tran) => (
+                            <tr key={tran.id}>
+                                <td>{moment(tran.date).format('LL')}</td>
                                 <td>{tran.product.name}</td>
                                 <td>
                                     {tran.type === 'sell' ? 'Jual' : 'Beli'}
@@ -222,27 +142,45 @@ const GetTransaction = ({
                                 </td>
                                 <td className="d-flex justify-content-between">
                                     {tran.customer ? tran.customer.name : '~'}
-                                    {auth && editing && (
+                                    {tran.info && (
+                                        <InfoTooltip info={tran.info} />
+                                    )}
+                                </td>
+                                {checkAdminMerchant(user) ? (
+                                    <td className="text-center">
                                         <Link
                                             to={`/transactions/edit?id=${tran.id}`}
+                                            className="mr-2"
                                         >
                                             <span
-                                                className={`material-icons align-middle`}
+                                                className={`material-icons align-middle text-primary`}
                                                 style={{ marginBottom: 2 }}
+                                                title="Edit"
                                             >
                                                 edit
                                             </span>
                                         </Link>
-                                    )}
-                                    {!editing && tran.info && (
-                                        <InfoTooltip info={tran.info} />
-                                    )}
-                                </td>
+                                        <span
+                                            className="material-icons align-middle text-danger ml-2"
+                                            style={{
+                                                marginBottom: 2,
+                                                userSelect: 'none',
+                                                cursor: 'pointer',
+                                            }}
+                                            data-toggle="modal"
+                                            data-target="#modal"
+                                            onClick={(e) => setDelId(tran.id)}
+                                            title="Delete"
+                                        >
+                                            delete
+                                        </span>
+                                    </td>
+                                ) : null}
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="6">
+                            <td colSpan="7" className="text-center">
                                 Belum ada transaksi, silahkan tambahkan
                                 transaksi
                             </td>
@@ -250,52 +188,36 @@ const GetTransaction = ({
                     )}
                 </tbody>
             </table>
-            {auth && (
-                <Fragment>
-                    <div className="d-flex justify-content-between">
-                        {deleting || (
-                            <Link className="m-0" to="/transactions/add">
-                                <span
-                                    className="material-icons"
-                                    style={{ fontSize: 30 }}
-                                >
-                                    add_box
-                                </span>
-                            </Link>
-                        )}
-
-                        {deleting || editing || (
-                            <ModifyingButtons
-                                editingButton={editingButton}
-                                deletingButton={deletingButton}
-                            />
-                        )}
-                        {editing && <div className="mt-1">
-                            <CancelButton onClick={cancelHandler} />
-                            </div>}
-                    </div>
-                    {deleting && (
-                        <Fragment>
-                            <p className="my-3">
-                                Selected: <strong>{selected.length}</strong>
-                            </p>
-                            <button
-                                className={`btn btn-danger ${
-                                    !selected.length > 0 && 'disabled'
-                                } mr-2`}
-                                disabled={!selected.length > 0}
-                                data-toggle="modal"
-                                data-target="#modal"
-                            >
-                                Delete
-                            </button>
-                            <CancelButton onClick={cancelHandler} />
-                        </Fragment>
-                    )}
-                </Fragment>
-            )}
-
-            <DeleteModal deleteHandler={deleteData} selectedData={selected} />
+            <div className="d-flex justify-content-around">
+                <ul className="pagination">
+                    <li className={`page-item ${activeNav('prev')}`}>
+                        <button
+                            className="page-link"
+                            onClick={() => setPage(page - 1)}
+                        >
+                            Previous
+                        </button>
+                    </li>
+                    {totalPage.map((number) => (
+                        <li
+                            className={`page-item ${activePage(number)}`}
+                            key={number}
+                            onClick={() => setPage(number)}
+                        >
+                            <button className="page-link">{number}</button>
+                        </li>
+                    ))}
+                    <li className={`page-item ${activeNav('next')}`}>
+                        <button
+                            className="page-link"
+                            onClick={() => setPage(page + 1)}
+                        >
+                            Next
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <DeleteModal deleteHandler={deleteData} />
         </div>
     );
 };
@@ -303,11 +225,13 @@ const GetTransaction = ({
 const mapDispatchToProps = (dispatch) => ({
     alert: (message, type) => dispatch(addAlert(message, type)),
     getTransaction: (page) => dispatch(getTransactions(page)),
+    setLoading: (loading) => dispatch(setLoading(loading)),
 });
 
 const mapStateToProps = (state) => ({
     transaction: state.transaction,
     user: state.user,
+    loading: state.loading,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GetTransaction);

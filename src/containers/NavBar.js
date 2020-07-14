@@ -160,16 +160,13 @@ function NavBar({ user, logout, history }) {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-primary w-100">
             <Link className="navbar-brand" to="/">
-                AHS
+                <p className="d-lg-none d-inline">AHS</p>
+                <p className="d-lg-inline d-none">Aqua Home Service</p>
             </Link>
             {user && renderNav()}
         </nav>
     );
 }
-
-NavBar.propTypes = {
-    authenticated: PropTypes.bool.isRequired,
-};
 
 const mapStateToProps = (state) => ({
     user: state.user,

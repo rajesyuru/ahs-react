@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { addAlert } from '../../redux/actions/alert';
+import { addAlert } from '../redux/actions/alert';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import PropTypes from "prop-types";
 
 const CustomerForm = ({
     stateName = '',

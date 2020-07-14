@@ -1,23 +1,27 @@
-import { post, get } from "../../axios";
+import { get } from "../../axios";
 import { addAlert } from "./alert";
 import { PRODUCT_GET } from '../actionTypes';
+import { setLoading } from './loading';
 
-export const getProducts = (page) => (dispatch) => {
+export const getProducts = (page, name = '') => (dispatch) => {
+    dispatch(setLoading(true))
     get(
-        `/products?limit=10&page=${page}`,
-         (success) => {
+        `/products?limit=10&page=${page}${name.length > 0 ? `&name=${name}` : ''}`,
+         ({ data, totalPage, totalData, page }) => {
             dispatch({
                 type: PRODUCT_GET,
                 payload: {
-                    data: success.data,
-                    currentPage: success.page,
-                    totalPage: success.totalPage,
-                    totalData: success.totalData,
+                    totalPage,
+                    totalData,
+                    page,
+                    data,
                 }
             });
+            dispatch(setLoading(false))
         },
         (error) => {
             dispatch(addAlert("Telah terjadi kesalahan"));
+            dispatch(setLoading(false))
         }
     );
 };

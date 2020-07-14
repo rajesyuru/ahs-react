@@ -1,6 +1,6 @@
-import React from 'react';
+import React from 'react'
 
-const DeleteModal = ({deleteHandler = () => {}, selectedData}) => {
+const DeleteModal = ({deleteHandler = () => {}, additionalText}) => {
     return (
         <div
             className="modal fade"
@@ -17,8 +17,7 @@ const DeleteModal = ({deleteHandler = () => {}, selectedData}) => {
                     </div>
                     <div className="modal-body py-3">
                         <p className="font-weight-bold">
-                            Are you really sure want to delete{' '}
-                            {selectedData.length > 1 ? 'these items' : 'this item'}?
+                            Are you really sure want to delete this item? {additionalText ? additionalText : null}
                         </p>
                         <small>(Note: You cannot undo this action)</small>
                     </div>
@@ -42,7 +41,7 @@ const DeleteModal = ({deleteHandler = () => {}, selectedData}) => {
                 </div>
             </div>
         </div>
-    );
-};
+    )
+}
 
 export default DeleteModal;

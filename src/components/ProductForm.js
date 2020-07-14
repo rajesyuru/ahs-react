@@ -12,6 +12,7 @@ const ProductForm = ({
     stateBuyingPrice = '',
     action,
     alert,
+    history,
 }) => {
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
@@ -76,21 +77,29 @@ const ProductForm = ({
                         onChange={(e) => setBuyingPrice(e.target.value)}
                     />
                 </div>
-                <button
-                    type="submit"
-                    className={`btn btn-primary ${loading ? 'disabled' : ''}`}
-                    disabled={loading}
-                >
-                    {action ? action : 'Submit'}
-                </button>
+                <div className="d-flex">
+                    <button
+                        type="submit"
+                        className={`btn btn-primary mr-2 ${
+                            loading && 'disabled'
+                        }`}
+                        disabled={loading}
+                    >
+                        {action ? action : 'Submit'}
+                    </button>
+                    <button
+                        type="button"
+                        className={`btn btn-secondary ${loading && 'disabled'}`}
+                        disabled={loading}
+                        onClick={() => history.goBack()}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
         </form>
     );
 };
-
-// LoginForm.propTypes = {
-//     onSubmit: PropTypes.func.isRequired,
-// };
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message) => dispatch(addAlert(message)),

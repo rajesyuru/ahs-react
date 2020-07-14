@@ -1,79 +1,60 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { addAlert } from '../../redux/actions/alert';
 import { withRouter, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { getProducts } from '../../redux/actions/product';
 import { formatPrice } from '../../utilities';
-import ModifyingButtons from '../../components/ModifyingButtons';
+import { checkAdminMerchant } from '../../utilities';
+import { setLoading } from '../../redux/actions/loading';
+import DeleteModal from '../../components/DeleteModal';
+import { del } from '../../axios';
 
-const GetProducts = ({ history, alert, user, getProducts, product }) => {
-    const [products, setProducts] = useState([]);
-    const [page, setPage] = useState(
-        history.location.search ? history.location.search.substring(6) * 1 : 1
-    );
-    const [totalPage, setTotal] = useState(1);
-    const [d, setD] = useState('d-none');
-    const [paging, setPaging] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [totalProduct, setTotalProduct] = useState(0);
-    const [auth, setAuth] = useState(false);
-    const [editing, setEditing] = useState(false);
-    const [deleting, setDeleting] = useState(false);
+const GetProducts = ({
+    history,
+    alert,
+    user,
+    getProducts,
+    product,
+    loading,
+    setLoading,
+}) => {
+    const [page, setPage] = useState(1);
+    const [totalPage, setTotalPage] = useState([]);
+    const [delId, setDelId] = useState(-1);
+    const [queryName, setQueryName] = useState('');
 
     useEffect(() => {
-        getProducts(page);
+        getProducts(page, queryName);
     }, [page]);
 
     useEffect(() => {
-        if (product === null) {
-            getProducts(page);
+        if (loading) {
+            setTotalPage(() => {
+                let a = [];
+                for (let i = 1; i <= (product ? product.totalPage : 1); i++) {
+                    a.push(i);
+                }
+                return a;
+            });
         }
-    }, []);
+    }, [product]);
 
-    useEffect(() => {
-        setLoading(true);
-        const search = history.location.search.substring(1);
-
-        if (
-            !search.includes('page') &&
-            history.location.pathname === '/products/get'
-        ) {
-            if (page !== 1) {
-                history.push(`/products/get?page=${page}`);
+    const activeNav = (type) => {
+        if (loading) {
+            return 'disabled';
+        }
+        if (type === 'prev') {
+            if (page === 1) {
+                return 'disabled';
             }
         } else {
-            setPage(search.substring(5) * 1);
-        }
-
-        if (user.merchant_id !== null && user.group_id === 1) {
-            setAuth(true);
-        }
-
-        if (product === null) {
-            getProducts(page);
-        } else {
-            const { data, totalPage, totalData } = product;
-
-            if (products && products.length !== 0) {
-                setProducts(data);
-                setInterval(() => {
-                    setLoading(false);
-                    setD(() => '');
-                }, 1000);
-                setTotal(totalPage);
-                setTotalProduct(totalData);
-                setPaging(() => {
-                    let a = [];
-                    for (let i = 1; i <= totalPage; i++) {
-                        a.push(i);
-                    }
-                    return a;
-                });
-            } else {
-                setProducts(data);
+            if (!product || product.totalPage < 1) {
+                return 'disabled';
+            } else if (page === product.totalPage) {
+                return 'disabled';
             }
         }
-    }, [page, history.location, product, products]);
+    };
 
     const activePage = (p) => {
         if (loading) {
@@ -86,171 +67,209 @@ const GetProducts = ({ history, alert, user, getProducts, product }) => {
         }
     };
 
-    const activeNav = (type) => {
-        if (loading) {
-            return 'disabled';
+    const deleteHandler = () => {
+        setLoading(true);
+        if (delId < 0) {
+            setLoading(false);
+            return alert('Telah terjadi kesalahan');
         }
-        if (type === 'prev') {
-            if (page === 1) {
-                return 'disabled';
+        del(
+            `/products/${delId}`,
+            (success) => {
+                alert('Berhasil menghapus data', 'success');
+                getProducts(page);
+                setLoading(false);
+                setDelId(-1);
+            },
+            (error) => {
+                alert('Berhasil menghapus data', 'success');
+                getProducts(page);
+                setLoading(false);
+                setDelId(-1);
             }
+        );
+    };
+
+    const searchName = (e) => {
+        e.preventDefault();
+
+        getProducts(1, queryName);
+    };
+
+    const inputOnChange = (e) => {
+        if (e.target.value.length === 0) {
+            getProducts(page, '');
         } else {
-            if (page === totalPage) {
-                return 'disabled';
-            }
+            setQueryName(e.target.value);
         }
     };
-
-    const editingButton = () => {
-        setEditing(true);
-        setDeleting(false);
-    };
-
-    const deletingButton = () => {
-        setEditing(false);
-        setDeleting(true);
-    };
-
-    const cancelButton = (
-        <button
-            className="btn btn-secondary"
-            onClick={() => {
-                setDeleting(false);
-                setEditing(false);
-            }}
-        >
-            Cancel
-        </button>
-    );
-
-    const editAndDeleteButtonOnTableRow = (
-        <Fragment>
-            {editing && (
-                <Link to={`/products/edit?id=${product.id}`}>
-                    <span
-                        className={`material-icons align-middle`}
-                        style={{ marginBottom: 2 }}
-                    >
-                        edit
-                    </span>
-                </Link>
-            )}
-            {deleting && (
-                <span
-                    className={`material-icons align-middle text-danger`}
-                    style={{
-                        marginBottom: 2,
-                        userSelect: 'none',
-                        cursor: 'pointer',
-                    }}
-                >
-                    delete
-                </span>
-            )}
-        </Fragment>
-    );
 
     return (
         <div className="container-fluid">
-            <table className={`table table-hover table-bordered mb-0`}>
+            <div className="d-flex justify-content-between mb-2">
+                <Link
+                    className={`btn btn-primary p-2 ${
+                        checkAdminMerchant(user) ? '' : 'disabled'
+                    }`}
+                    to="/products/add"
+                >
+                    Add Product
+                    <span className="material-icons align-middle ml-1">
+                        add
+                    </span>
+                </Link>
+                <form
+                    className="input-group w-25 h-100 mt-1"
+                    onSubmit={searchName}
+                >
+                    <input
+                        type="text"
+                        className="form-control"
+                        onChange={inputOnChange}
+                    />
+                    <div className="input-group-append">
+                        <button
+                            className="btn btn-outline-primary"
+                            type="submit"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <table className="table table-hover table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Product Name</th>
                         <th scope="col">Price</th>
                         <th scope="col">Buying Price</th>
-                        {!auth && (
+                        {user.merchant_id === null ? (
                             <th scope="col">Merchant</th>
-                        )}
+                        ) : null}
+                        {checkAdminMerchant(user) ? (
+                            <th scope="col" className="text-center">
+                                Actions
+                            </th>
+                        ) : null}
                     </tr>
                 </thead>
-                <tbody>
-                    {products &&
-                        products.map((product) => (
-                            <tr key={product.id} className={`${d}`}>
+                <tbody className={`${loading && 'd-none'}`}>
+                    {product && product.data.length > 0 ? (
+                        product.data.map((product) => (
+                            <tr key={product.id}>
                                 <td>{product.id}</td>
                                 <td>{product.name}</td>
                                 <td>{`Rp. ${formatPrice(product.price)}`}</td>
-                                <td className={auth ? 'd-flex justify-content-between' : null}>{`Rp. ${formatPrice(
+                                <td>{`Rp. ${formatPrice(
                                     product.buying_price
-                                )}`} {auth ? editAndDeleteButtonOnTableRow : null}</td>
-                                {!auth && (
-                                    <td className="d-flex justify-content-between">
-                                    {product.owner.name}
-                                    {editAndDeleteButtonOnTableRow}
-                                </td>
-                                )}
+                                )}`}</td>
+                                {user.merchant_id === null ? (
+                                    <td> {product.owner.name} </td>
+                                ) : null}
+                                {checkAdminMerchant(user) ? (
+                                    <td className="text-center">
+                                        <Link
+                                            to={`/products/edit?id=${product.id}`}
+                                            className="mr-2"
+                                        >
+                                            <span
+                                                className={`material-icons align-middle text-primary`}
+                                                style={{ marginBottom: 2 }}
+                                                title="Edit"
+                                            >
+                                                edit
+                                            </span>
+                                        </Link>
+                                        <span
+                                            className="material-icons align-middle text-danger ml-2"
+                                            style={{
+                                                marginBottom: 2,
+                                                userSelect: 'none',
+                                                cursor: 'pointer',
+                                            }}
+                                            data-toggle="modal"
+                                            data-target="#modal"
+                                            onClick={(e) =>
+                                                setDelId(product.id)
+                                            }
+                                            title="Delete"
+                                        >
+                                            delete
+                                        </span>
+                                    </td>
+                                ) : null}
                             </tr>
-                        ))}
+                        ))
+                    ) : (
+                        <tr>
+                            <td
+                                colSpan={
+                                    checkAdminMerchant(user)
+                                        ? 5
+                                        : user.merchant_id === null
+                                        ? 5
+                                        : 4
+                                }
+                                className="text-center"
+                            >
+                                {queryName.length > 0
+                                    ? 'Produk tidak ditemukan'
+                                    : checkAdminMerchant(user)
+                                    ? 'Belum ada produk, silahkan tambahkan produk'
+                                    : 'Belum ada produk'}
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
-            {auth && (
-                <div className="d-flex justify-content-between">
-                    <Link className="m-0" to="/products/add">
-                        <span
-                            className="material-icons"
-                            style={{ fontSize: 30 }}
-                        >
-                            add_box
-                        </span>
-                    </Link>
-                    {!deleting && !editing ? (
-                        <ModifyingButtons
-                            editingButton={editingButton}
-                            deletingButton={deletingButton}
-                        />
-                    ) : null}
-                    {editing || deleting ? (
-                        <div className="mt-1">{cancelButton}</div>
-                    ) : null}
-                </div>
-            )}
-
-            <p className="font-weight-bold">Total: {totalProduct}</p>
             <div className="d-flex justify-content-around">
                 <ul className="pagination">
                     <li className={`page-item ${activeNav('prev')}`}>
-                        <Link
+                        <button
                             className="page-link"
-                            to={{ search: `?page=${page - 1}` }}
+                            onClick={() => setPage(page - 1)}
                         >
                             Previous
-                        </Link>
+                        </button>
                     </li>
-                    {paging.map((number) => (
+                    {totalPage.map((number) => (
                         <li
                             className={`page-item ${activePage(number)}`}
                             key={number}
+                            onClick={() => setPage(number)}
                         >
-                            <Link
-                                className="page-link"
-                                to={{ search: `?page=${number}` }}
-                            >
-                                {number}
-                            </Link>
+                            <button className="page-link">{number}</button>
                         </li>
                     ))}
                     <li className={`page-item ${activeNav('next')}`}>
-                        <Link
+                        <button
                             className="page-link"
-                            to={{ search: `?page=${page + 1}` }}
+                            onClick={() => setPage(page + 1)}
                         >
                             Next
-                        </Link>
+                        </button>
                     </li>
                 </ul>
             </div>
+            <DeleteModal
+                deleteHandler={deleteHandler}
+                additionalText="All transactions related to this product will also be deleted."
+            />
         </div>
     );
 };
 
 const mapDispatchToProps = (dispatch) => ({
-    alert: (message) => dispatch(addAlert(message)),
-    getProducts: (page) => dispatch(getProducts(page)),
+    alert: (message, type) => dispatch(addAlert(message, type)),
+    getProducts: (page, name) => dispatch(getProducts(page, name)),
+    setLoading: (loading) => dispatch(setLoading(loading)),
 });
 
 const mapStateToProps = (state) => ({
     product: state.product,
+    loading: state.loading,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GetProducts);

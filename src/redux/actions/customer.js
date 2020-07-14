@@ -3,10 +3,10 @@ import { addAlert } from './alert';
 import { setLoading } from './loading';
 import { CUSTOMER_ADD } from '../actionTypes';
 
-export const getCustomers = (page) => (dispatch) => {
+export const getCustomers = (page, name = '') => (dispatch) => {
     dispatch(setLoading(true));
     get(
-        `/customers?page=${page}&limit=10`,
+        `/customers?page=${page}&limit=10${name.length > 0 ? `&name=${name}` : ''}`,
         ({ data, totalPage, totalData, page }) => {
             dispatch({
                 type: CUSTOMER_ADD,

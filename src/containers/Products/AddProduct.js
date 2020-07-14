@@ -38,7 +38,7 @@ const AddProduct = ({ user, history, alert }) => {
     };
     return (
         <div>
-            <ProductForm onSubmit={submitHandler} loading={loading} />
+            <ProductForm onSubmit={submitHandler} loading={loading} history={history} />
         </div>
     );
 };

@@ -2,40 +2,40 @@ import React, { useState, useEffect, Fragment } from 'react';
 import { getCustomers } from '../../redux/actions/customer';
 import { connect } from 'react-redux';
 import { withRouter, Link } from 'react-router-dom';
-import ModifyingButtons from '../../components/ModifyingButtons';
-import DeleteCustomerModal from '../../components/Customer/DeleteCustomerModal';
+import DeleteModal from '../../components/DeleteModal';
 import { setLoading } from '../../redux/actions/loading';
-import { del } from '../../axios'
+import { del } from '../../axios';
 import { addAlert } from '../../redux/actions/alert';
-import CancelButton from '../../components/CancelButton';
+import { checkAdminMerchant } from '../../utilities';
 
-const GetCustomers = ({ customer, loading, getCustomers, user, history, alert }) => {
-    const [deleting, setDeleting] = useState(false);
-    const [editing, setEditing] = useState(false);
+const GetCustomers = ({
+    customer,
+    loading,
+    getCustomers,
+    user,
+    history,
+    alert,
+}) => {
     const [page, setPage] = useState(1);
     const [totalPage, setTotalPage] = useState([]);
     const [delId, setDelId] = useState(-1);
+    const [queryName, setQueryName] = useState('');
 
     useEffect(() => {
-        getCustomers(page);
+        getCustomers(page, queryName);
     }, [page]);
 
     useEffect(() => {
         if (loading) {
             setTotalPage(() => {
                 let a = [];
-                for (let i = 1; i <= (customer && customer.totalPage); i++) {
+                for (let i = 1; i <= (customer ? customer.totalPage : 1); i++) {
                     a.push(i);
                 }
                 return a;
             });
         }
     }, [customer]);
-
-    const cancelHandler = () => {
-        setDeleting(false);
-        setEditing(false);
-    };
 
     const activeNav = (type) => {
         if (loading) {
@@ -46,7 +46,9 @@ const GetCustomers = ({ customer, loading, getCustomers, user, history, alert })
                 return 'disabled';
             }
         } else {
-            if (page === (customer && customer.totalPage)) {
+            if (!customer || customer.totalPage < 1) {
+                return 'disabled';
+            } else if (page === customer.totalPage) {
                 return 'disabled';
             }
         }
@@ -63,48 +65,88 @@ const GetCustomers = ({ customer, loading, getCustomers, user, history, alert })
         }
     };
 
-    const editingButton = () => {
-        setEditing(true);
-        setDeleting(false);
-    };
-
-    const deletingButton = () => {
-        setEditing(false);
-        setDeleting(true);
-    };
-
     const deleteHandler = () => {
         setLoading(true);
         if (delId < 0) {
-            setLoading(false)
+            setLoading(false);
             return alert('Telah terjadi kesalahan');
         }
         del(
             `/customers/${delId}`,
             (success) => {
                 alert('Berhasil menghapus data', 'success');
-                setDeleting(false);
-                setEditing(false);
-                setDelId(-1);
-                getCustomers(page)
+                getCustomers(page);
                 setLoading(false);
+                setDelId(-1);
             },
             (error) => {
-                setLoading(false)
                 alert('Telah terjadi kesalahan');
+                getCustomers(page);
+                setLoading(false);
+                setDelId(-1);
             }
-        )
+        );
+    };
+
+    const searchName = (e) => {
+        e.preventDefault();
+
+        getCustomers(1, queryName);
+    };
+
+    const inputOnChange = (e) => {
+        if (e.target.value.length === 0) {
+            getCustomers(page, '');
+        } else {
+            setQueryName(e.target.value);
+        }
     };
 
     return (
-        <div className={`container-fluid`}>
-            <table className={`table table-hover table-bordered mb-0`}>
+        <div className="container-fluid">
+            <div className="d-flex justify-content-between mb-2">
+                <Link
+                    className={`btn btn-primary p-2 ${
+                        checkAdminMerchant(user) ? '' : 'disabled'
+                    }`}
+                    to="/customers/add"
+                >
+                    Add Customer
+                    <span className="material-icons align-middle ml-1">
+                        add
+                    </span>
+                </Link>
+                <form
+                    className="input-group w-25 h-100 mt-1"
+                    onSubmit={searchName}
+                >
+                    <input
+                        type="text"
+                        className="form-control"
+                        onChange={inputOnChange}
+                    />
+                    <div className="input-group-append">
+                        <button
+                            className="btn btn-outline-primary"
+                            type="submit"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <table className="table table-hover table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">Name</th>
                         <th scope="col">Email</th>
                         <th scope="col">Phone</th>
                         <th scope="col">Address</th>
+                        {checkAdminMerchant(user) ? (
+                            <th scope="col" className="text-center">
+                                Actions
+                            </th>
+                        ) : null}
                     </tr>
                 </thead>
                 <tbody className={`${loading && 'd-none'}`}>
@@ -114,38 +156,45 @@ const GetCustomers = ({ customer, loading, getCustomers, user, history, alert })
                                 <td>{custom.name}</td>
                                 <td> {custom.email || '~'} </td>
                                 <td> {custom.phone} </td>
-                                <td className="d-flex justify-content-between">
-                                    {custom.address}
-                                    {editing ? (
+                                <td> {custom.address}</td>
+                                {checkAdminMerchant(user) ? (
+                                    <td className="text-center">
                                         <Link
                                             to={`/customers/edit?id=${custom.id}`}
+                                            className="mr-2"
                                         >
                                             <span
                                                 className={`material-icons align-middle text-primary`}
                                                 style={{ marginBottom: 2 }}
+                                                title="Edit"
                                             >
                                                 edit
                                             </span>
                                         </Link>
-                                    ) : deleting ? (
                                         <span
-                                            className={`material-icons align-middle text-danger`}
-                                            style={{ marginBottom: 2, userSelect: 'none', cursor: 'pointer' }}
+                                            className="material-icons align-middle text-danger ml-2"
+                                            style={{
+                                                marginBottom: 2,
+                                                userSelect: 'none',
+                                                cursor: 'pointer',
+                                            }}
                                             data-toggle="modal"
                                             data-target="#modal"
                                             onClick={(e) => setDelId(custom.id)}
+                                            title="Delete"
                                         >
                                             delete
                                         </span>
-                                    ) : null}
-                                </td>
+                                    </td>
+                                ) : null}
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="4" className="text-center">
-                                {user.group_id === 1 &&
-                                user.merchant_id !== null
+                            <td colSpan="5" className="text-center">
+                                {queryName.length > 0
+                                    ? 'Pelanggan tidak ditemukan'
+                                    : checkAdminMerchant(user)
                                     ? 'Belum ada pelanggan, silahkan tambahkan pelanggan'
                                     : 'Belum ada pelanggan'}
                             </td>
@@ -153,31 +202,6 @@ const GetCustomers = ({ customer, loading, getCustomers, user, history, alert })
                     )}
                 </tbody>
             </table>
-            {user.group_id === 1 && user.merchant_id !== null ? (
-                <Fragment>
-                    <div className="d-flex justify-content-between">
-                        <Link className="m-0" to="/customers/add">
-                            <span
-                                className="material-icons"
-                                style={{ fontSize: 30 }}
-                            >
-                                add_box
-                            </span>
-                        </Link>
-
-                        {!deleting && !editing ? (
-                            <ModifyingButtons
-                                editingButton={editingButton}
-                                deletingButton={deletingButton}
-                            />
-                        ) : (
-                            <div className="mt-1">
-                                <CancelButton onClick={cancelHandler} />
-                            </div>
-                        )}
-                    </div>
-                </Fragment>
-            ) : null}
             <div className="d-flex justify-content-around">
                 <ul className="pagination">
                     <li className={`page-item ${activeNav('prev')}`}>
@@ -207,7 +231,10 @@ const GetCustomers = ({ customer, loading, getCustomers, user, history, alert })
                     </li>
                 </ul>
             </div>
-            <DeleteCustomerModal deleteHandler={deleteHandler} />
+            <DeleteModal
+                deleteHandler={deleteHandler}
+                additionalText="All transactions related to this customer will also be deleted."
+            />
         </div>
     );
 };
@@ -220,8 +247,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message, type) => dispatch(addAlert(message, type)),
-    getCustomers: (page) => dispatch(getCustomers(page)),
-    setLoading: (loading) => dispatch(setLoading(loading))
+    getCustomers: (page, name) => dispatch(getCustomers(page, name)),
+    setLoading: (loading) => dispatch(setLoading(loading)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GetCustomers);

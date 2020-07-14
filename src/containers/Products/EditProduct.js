@@ -90,6 +90,7 @@ const EditProduct = ({ user, history, alert }) => {
                 statePrice={price}
                 stateBuyingPrice={buyingPrice}
                 action="Edit"
+                history={history}
             />
         </div>
     ) : <div></div>;

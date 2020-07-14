@@ -1,23 +1,27 @@
 import { get } from '../../axios';
 import { addAlert } from './alert';
-import { TRANSACTION_ADD, TRANSACTION_REMOVE } from '../actionTypes';
+import { setLoading } from './loading';
+import { TRANSACTION_ADD } from '../actionTypes';
 
 export const getTransactions = (page) => (dispatch) => {
+    dispatch(setLoading(true))
     get(
         `/transactions?limit=10&page=${page}`,
         ({data, page, totalPage, totalData}) => {
             dispatch({
                 type: TRANSACTION_ADD,
                 payload: {
-                    data: data,
-                    currentPage: page,
-                    totalPage: totalPage,
-                    totalData: totalData,
+                    totalPage,
+                    totalData,
+                    page,
+                    data,
                 },
             });
+            dispatch(setLoading(false))
         },
         (error) => {
             dispatch(addAlert('Telah terjadi kesalahan'));
+            dispatch(setLoading(false))
         }
     );
 };

@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import GetStocks from './Stocks/GetStocks';
-import { get } from '../axios';
-
 function Home({ user, history }) {
     return (
-        <div className="container-fluid">
+        <Fragment>
             {user.merchant_id === null ? (
                 <h1>Welcome, Admin</h1>
             ) : (
                 <GetStocks />
             )}
-        </div>
+        </Fragment>
     );
 }
 

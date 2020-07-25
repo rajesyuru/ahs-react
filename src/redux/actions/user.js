@@ -1,15 +1,18 @@
 import { post, get } from '../../axios';
 import { addAlert } from './alert';
+import { setLoading } from './loading';
 import {
     USER_SET,
     USER_REMOVE,
     PRODUCT_REMOVE,
     TRANSACTION_REMOVE,
     STOCKS_REMOVE,
-    CUSTOMER_REMOVE
+    CUSTOMER_REMOVE,
+    SET_MENU_CLOSE
 } from '../actionTypes';
 
 export const login = (email, password) => (dispatch) => {
+    dispatch(setLoading(true));
     post(
         '/auth/login',
         {
@@ -33,14 +36,17 @@ export const login = (email, password) => (dispatch) => {
                             merchant_id: data.merchant_id,
                         },
                     });
+                    dispatch(setLoading(false));
                 },
                 (error) => {
                     dispatch(addAlert('Telah terjadi kesalahan'));
+                    dispatch(setLoading(false));
                 }
             );
         },
         (error) => {
-            dispatch(addAlert(error.message));
+            dispatch(addAlert(error ? error.message : error));
+            dispatch(setLoading(false));
         }
     );
 };
@@ -53,4 +59,5 @@ export const logout = () => (dispatch) => {
     dispatch({ type: TRANSACTION_REMOVE });
     dispatch({ type: STOCKS_REMOVE });
     dispatch({ type: CUSTOMER_REMOVE });
+    dispatch({ type: SET_MENU_CLOSE });
 };

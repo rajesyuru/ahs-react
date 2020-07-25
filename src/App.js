@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import Content from './containers/Content'
+import './styles/App.scss'
 
 function App() {
     return (

@@ -1,0 +1,289 @@
+@import url('https://fonts.googleapis.com/css2?family=Varta:wght@500&display=swap');
+
+$primary-color: rgb(26, 57, 161);
+$secondary-color: rgb(68, 144, 214);
+$foreground-color: whitesmoke;
+$separator-color-light: #b3b3b3;
+$sidenav-primary: rgb(92, 160, 223);
+$sidenav-secondary: rgb(16, 107, 192);
+
+$main-font: 'Varta',
+sans-serif;
+$navbar-logo: url('https://img2.pngdownload.id/20181124/izv/kisspng-aqua-logo-water-text-brand-5bf9b66fcec8a9.246932661543091823847.jpg');
+$full-height: 100vh;
+$full-width: 100vw;
+$logo: url('https://vectorlogo4u.com/wp-content/uploads/2019/09/Aqua-Logo-Vector-2019-520x245.png');
+$default-user-profile-picture: url('https://i.pinimg.com/originals/51/f6/fb/51f6fb256629fc755b8870c801092942.png');
+
+$main-menu-item-height: 110px;
+$main-menu-width: 120px;
+$main-menu-width-lg: 110px;
+$main-menu-width-md: 100px;
+$main-menu-width-xs: 90px;
+
+$navbar-height: 100px;
+$navbar-height-xs: 70px;
+$navbar-height-md: 80px;
+$navbar-height-lg: 90px;
+
+$navbar-border-radius: 13px;
+
+$menu-collapse-time: 300ms;
+$animation-time-long: 1000ms;
+$animation-time-short: 200ms;
+
+$main-margin: 60px;
+$main-margin-lg: 50px;
+$main-margin-md: 40px;
+$main-margin-xs: 15px;
+
+.main-container {
+
+    .page-loading-spinner {
+        color: $sidenav-secondary;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        width: 70px;
+        height: 70px;
+    }
+
+    .table-loading-spinner {
+        color: $sidenav-secondary;
+    }
+
+    .custom-navbar {
+        background: whitesmoke;
+        padding: 10px 0;
+        height: $navbar-height;
+
+        .navbar-logo {
+            width: 170px;
+            height: 170px;
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+
+            .logo-mobile {
+                width: 100%;
+                height: 100%;
+                background: $logo no-repeat;
+                background-position: center center;
+                background-size: contain;
+            }
+        }
+
+        .default-profile-picture {
+            img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    }
+
+    main {
+        height: 100%;
+        margin-top: 6rem;
+        margin-left: 0rem;
+        margin-right: 0rem;
+        max-width: $full-width;
+        transition: margin-left $menu-collapse-time;
+
+        &.open {
+            margin-left: 7.2rem;
+        }
+    }
+
+    .menu-button-mobile {
+        color: $secondary-color;
+        text-align: center;
+        margin-left: $main-margin-xs;
+
+        svg {
+            height: 12px;
+            fill: $primary-color;
+        }
+    }
+
+    .menu-button {
+        color: $secondary-color;
+        width: $main-menu-width;
+        text-align: center;
+
+        svg {
+            height: 12px;
+        }
+
+        .main {
+            fill: $primary-color;
+            transition: fill $menu-collapse-time;
+            width: 10px;
+        }
+
+        .sub {
+            fill: $primary-color;
+            transition: fill $menu-collapse-time;
+        }
+    }
+
+    .notification-container {
+        box-sizing: border-box;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 999999;
+        width: 320px;
+        padding: 0px 15px;
+        max-height: calc(100% - 30px);
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        .notification-alert {
+            margin-top: 20px;
+        }
+    }
+
+    .custom-alert {
+        right: 50%;
+    }
+
+    .custom-login {
+        height: $full-height;
+        width: $full-width;
+        margin: 0;
+        background-image: linear-gradient(to top right,
+                $primary-color,
+                $secondary-color);
+
+        .custom-login-card {
+
+            p,
+            h2 {
+                font-family: $main-font;
+            }
+        }
+
+        .custom-login-button {
+            background-color: $primary-color;
+        }
+
+        .custom-login-form-forgot-password {
+            text-decoration: none;
+            color: $primary-color;
+        }
+
+        .custom-loading-spinner {
+            max-width: 1.5rem;
+            max-height: 1.5rem;
+        }
+    }
+
+    .side-nav {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        padding-top: $navbar-height;
+        z-index: 4;
+        height: calc(100% - #{$navbar-height});
+        transition: border-radius $menu-collapse-time;
+
+        .scrollbar-container {
+            margin-right: 0;
+            padding-right: 0;
+        }
+
+        .main-menu {
+            width: $main-menu-width;
+            height: calc(100% - #{$navbar-height});
+            background: $foreground-color;
+            z-index: 3;
+            position: fixed;
+            transition: transform $menu-collapse-time;
+            padding-top: 20px;
+            border-top-right-radius: $navbar-border-radius;
+            border-bottom-right-radius: $navbar-border-radius;
+            padding-bottom: 10px;
+            left: 0;
+
+            .scroll {
+                padding-right: unset;
+                margin-right: unset;
+                height: 100%;
+
+                .ps__thumb-y {
+                    right: 0;
+                }
+            }
+
+            &.main-hidden {
+                transform: translateX(-$main-menu-width);
+            }
+
+            ul li {
+                position: relative;
+
+                span {
+                    text-align: center;
+                    padding: 0 10px;
+                    line-height: 14px;
+                }
+
+                a {
+                    height: $main-menu-item-height;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 13px;
+                    font-style: normal;
+                    font-weight: 400;
+                    border-bottom: 1px solid $separator-color-light;
+                    color: $sidenav-primary;
+                    transition: color $menu-collapse-time;
+                    transition: background $menu-collapse-time;
+                    text-decoration: none;
+
+                    &:hover,
+                    &:focus {
+                        color: $sidenav-secondary;
+                    }
+                }
+
+                i {
+                    font-size: 32px;
+                    line-height: 42px;
+                }
+
+                &.active a {
+                    color: $sidenav-secondary;
+                }
+
+                &.active:after {
+                    content: "";
+                    background: $primary-color;
+                    border-radius: 10px;
+                    position: absolute;
+                    width: 6px;
+                    height: 90px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    left: 0;
+                }
+
+                &:last-of-type {
+                    a {
+                        border-bottom: initial;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.btn.nav-profile-picture:focus {
+    box-shadow: none;
+}

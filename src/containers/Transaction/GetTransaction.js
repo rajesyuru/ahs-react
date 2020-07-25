@@ -10,6 +10,7 @@ import InfoTooltip from '../../components/InfoTooltip';
 import { formatPrice, checkAdminMerchant } from '../../utilities';
 import DeleteModal from '../../components/DeleteModal';
 import { setLoading } from '../../redux/actions/loading';
+import TableLoadingSpinner from '../../components/TableLoadingSpinner';
 
 const GetTransaction = ({
     alert,
@@ -122,8 +123,8 @@ const GetTransaction = ({
                         ) : null}
                     </tr>
                 </thead>
-                <tbody className={`${loading ? 'd-none' : ''}`}>
-                    {transaction && transaction.data.length > 0 ? (
+                <tbody>
+                    {!loading ? transaction && transaction.data && transaction.data.length > 0 ? (
                         transaction.data.map((tran) => (
                             <tr key={tran.id}>
                                 <td>{moment(tran.date).format('LL')}</td>
@@ -183,6 +184,12 @@ const GetTransaction = ({
                             <td colSpan="7" className="text-center">
                                 Belum ada transaksi, silahkan tambahkan
                                 transaksi
+                            </td>
+                        </tr>
+                    ) : (
+                        <tr>
+                            <td colSpan="7" className="text-center">
+                                <TableLoadingSpinner loading={loading} />
                             </td>
                         </tr>
                     )}

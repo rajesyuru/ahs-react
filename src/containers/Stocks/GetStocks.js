@@ -5,6 +5,7 @@ import { addAlert } from '../../redux/actions/alert';
 import { get } from '../../axios';
 import ProductStock from '../../components/ProductStock'
 import { getStocks } from '../../redux/actions/stock';
+import PageLoadingSpinner from '../../components/PageLoadingSpinner'
 
 const GetStocks = ({ stock, getStocks, loading }) => {
     const [owned, setOwned] = useState([]);
@@ -15,6 +16,7 @@ const GetStocks = ({ stock, getStocks, loading }) => {
 
     return (
         <div className="container">
+            <PageLoadingSpinner loading={loading} />
             <div className="row row-cols-md-5">
                 {!loading ? <Fragment>
                     {stock && stock.data.map((own) => 

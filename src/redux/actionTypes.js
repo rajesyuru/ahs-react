@@ -1,14 +1,32 @@
-export const ALERT_ADD = "ALERT_ADD";
-export const ALERT_REMOVE = "ALERT_REMOVE";
-export const USER_SET = "USER_SET";
-export const USER_REMOVE = "USER_REMOVE";
-export const LOADING_START = "LOADING_START";
-export const LOADING_END = "LOADING_END";
-export const PRODUCT_GET = "PRODUCT_GET";
-export const PRODUCT_REMOVE = "PRODUCT_REMOVE";
-export const TRANSACTION_ADD = "TRANSACTION_ADD";
-export const TRANSACTION_REMOVE = "TRANSACTION_REMOVE";
-export const STOCKS_ADD = "STOCKS_ADD";
-export const STOCKS_REMOVE = "STOCKS_REMOVE";
-export const CUSTOMER_ADD = "CUSTOMER_ADD";
-export const CUSTOMER_REMOVE = "CUSTOMER_REMOVE";
+// Alert
+
+export const ALERT_ADD = 'ALERT_ADD';
+export const ALERT_REMOVE = 'ALERT_REMOVE';
+
+// User
+export const USER_SET = 'USER_SET';
+export const USER_REMOVE = 'USER_REMOVE';
+
+// Loading
+export const LOADING_START = 'LOADING_START';
+export const LOADING_END = 'LOADING_END';
+
+// Product
+export const PRODUCT_GET = 'PRODUCT_GET';
+export const PRODUCT_REMOVE = 'PRODUCT_REMOVE';
+
+// Transaction
+export const TRANSACTION_ADD = 'TRANSACTION_ADD';
+export const TRANSACTION_REMOVE = 'TRANSACTION_REMOVE';
+
+// Stocks
+export const STOCKS_ADD = 'STOCKS_ADD';
+export const STOCKS_REMOVE = 'STOCKS_REMOVE';
+
+// Customer
+export const CUSTOMER_ADD = 'CUSTOMER_ADD';
+export const CUSTOMER_REMOVE = 'CUSTOMER_REMOVE';
+
+// Menu
+export const SET_MENU_OPEN = 'SET_MENU_OPEN';
+export const SET_MENU_CLOSE = 'SET_MENU_CLOSE';

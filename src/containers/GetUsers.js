@@ -3,27 +3,32 @@ import { get } from '../axios';
 import { addAlert } from '../redux/actions/alert';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import { setLoading } from '../redux/actions/loading';
+import TableLoadingSpinner from '../components/TableLoadingSpinner'
 
-const GetUsers = ({ alert }) => {
+const GetUsers = ({ alert, loading, setLoading }) => {
     const [users, setList] = useState([]);
     const [d, setD] = useState('d-none');
 
     useEffect(() => {
+        setLoading(true)
         get(
             '/users',
             (success) => {
                 setD(() => '');
                 setList(() => success.data);
+                setLoading(false)
             },
             (error) => {
                 alert(`Telah terjadi kesalahan`);
+                setLoading(false)
             }
         );
     }, []);
 
     return (
         <div>
-            <table className={`table table-striped ${d}`}>
+            <table className="table table-hover table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -33,7 +38,7 @@ const GetUsers = ({ alert }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map((user) => (
+                    {!loading ? users.map((user) => (
                         <tr key={user.id}>
                             <td>{user.id}</td>
                             <td>{user.name}</td>
@@ -44,7 +49,13 @@ const GetUsers = ({ alert }) => {
                                     : '(SUPER ADMIN)'}
                             </td>
                         </tr>
-                    ))}
+                    )) : (
+                        <tr>
+                            <td colSpan="4" className="text-center">
+                                <TableLoadingSpinner loading={loading} />
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>
@@ -53,6 +64,11 @@ const GetUsers = ({ alert }) => {
 
 const mapDispatchToProps = (dispatch) => ({
     alert: (message) => dispatch(addAlert(message)),
+    setLoading: (loading) => dispatch(setLoading(loading))
 });
 
-export default connect(null, mapDispatchToProps)(GetUsers);
+const mapStateToProps = (state) => ({
+    loading: state.loading
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(GetUsers);

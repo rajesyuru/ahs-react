@@ -8,6 +8,7 @@ import { checkAdminMerchant } from '../../utilities';
 import { setLoading } from '../../redux/actions/loading';
 import DeleteModal from '../../components/DeleteModal';
 import { del } from '../../axios';
+import TableLoadingSpinner from '../../components/TableLoadingSpinner';
 
 const GetProducts = ({
     history,
@@ -31,7 +32,11 @@ const GetProducts = ({
         if (loading) {
             setTotalPage(() => {
                 let a = [];
-                for (let i = 1; i <= (product ? product.totalPage : 1); i++) {
+                for (
+                    let i = 1;
+                    i <= (product && product.totalPage ? product.totalPage : 1);
+                    i++
+                ) {
                     a.push(i);
                 }
                 return a;
@@ -111,8 +116,7 @@ const GetProducts = ({
                     className={`btn btn-primary p-2 ${
                         checkAdminMerchant(user) ? '' : 'disabled'
                     }`}
-                    to="/products/add"
-                >
+                    to="/products/add">
                     Add Product
                     <span className="material-icons align-middle ml-1">
                         add
@@ -120,8 +124,7 @@ const GetProducts = ({
                 </Link>
                 <form
                     className="input-group w-25 h-100 mt-1"
-                    onSubmit={searchName}
-                >
+                    onSubmit={searchName}>
                     <input
                         type="text"
                         className="form-control"
@@ -130,8 +133,7 @@ const GetProducts = ({
                     <div className="input-group-append">
                         <button
                             className="btn btn-outline-primary"
-                            type="submit"
-                        >
+                            type="submit">
                             Search
                         </button>
                     </div>
@@ -155,8 +157,8 @@ const GetProducts = ({
                         ) : null}
                     </tr>
                 </thead>
-                <tbody className={`${loading && 'd-none'}`}>
-                    {product && product.data.length > 0 ? (
+                <tbody>
+                    {!loading ? product && product.data && product.data.length > 0 ? (
                         product.data.map((product) => (
                             <tr key={product.id}>
                                 <td>{product.id}</td>
@@ -172,13 +174,11 @@ const GetProducts = ({
                                     <td className="text-center">
                                         <Link
                                             to={`/products/edit?id=${product.id}`}
-                                            className="mr-2"
-                                        >
+                                            className="mr-2">
                                             <span
                                                 className={`material-icons align-middle text-primary`}
                                                 style={{ marginBottom: 2 }}
-                                                title="Edit"
-                                            >
+                                                title="Edit">
                                                 edit
                                             </span>
                                         </Link>
@@ -194,8 +194,7 @@ const GetProducts = ({
                                             onClick={(e) =>
                                                 setDelId(product.id)
                                             }
-                                            title="Delete"
-                                        >
+                                            title="Delete">
                                             delete
                                         </span>
                                     </td>
@@ -212,13 +211,26 @@ const GetProducts = ({
                                         ? 5
                                         : 4
                                 }
-                                className="text-center"
-                            >
+                                className="text-center">
                                 {queryName.length > 0
                                     ? 'Produk tidak ditemukan'
                                     : checkAdminMerchant(user)
                                     ? 'Belum ada produk, silahkan tambahkan produk'
                                     : 'Belum ada produk'}
+                            </td>
+                        </tr>
+                    ) : (
+                        <tr>
+                            <td
+                                colSpan={
+                                    checkAdminMerchant(user)
+                                        ? 5
+                                        : user.merchant_id === null
+                                        ? 5
+                                        : 4
+                                }
+                                className="text-center">
+                                <TableLoadingSpinner loading={loading} />
                             </td>
                         </tr>
                     )}
@@ -229,25 +241,25 @@ const GetProducts = ({
                     <li className={`page-item ${activeNav('prev')}`}>
                         <button
                             className="page-link"
-                            onClick={() => setPage(page - 1)}
-                        >
+                            onClick={() => setPage(page - 1)}>
                             Previous
                         </button>
                     </li>
                     {totalPage.map((number) => (
                         <li
                             className={`page-item ${activePage(number)}`}
-                            key={number}
-                            onClick={() => setPage(number)}
-                        >
-                            <button className="page-link">{number}</button>
+                            key={number}>
+                            <button
+                                className="page-link"
+                                onClick={() => setPage(number)}>
+                                {number}
+                            </button>
                         </li>
                     ))}
                     <li className={`page-item ${activeNav('next')}`}>
                         <button
                             className="page-link"
-                            onClick={() => setPage(page + 1)}
-                        >
+                            onClick={() => setPage(page + 1)}>
                             Next
                         </button>
                     </li>

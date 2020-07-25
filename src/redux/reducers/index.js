@@ -6,6 +6,7 @@ import { transaction } from './transaction';
 import { stock } from './stock';
 import { loading } from './loading';
 import { customer } from './customer';
+import { menu } from './menu';
 
 export default combineReducers({
     alert,
@@ -15,4 +16,5 @@ export default combineReducers({
     stock,
     loading,
     customer,
+    menu
 });

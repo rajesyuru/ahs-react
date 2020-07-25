@@ -7,6 +7,7 @@ import { setLoading } from '../../redux/actions/loading';
 import { del } from '../../axios';
 import { addAlert } from '../../redux/actions/alert';
 import { checkAdminMerchant } from '../../utilities';
+import TableLoadingSpinner from '../../components/TableLoadingSpinner';
 
 const GetCustomers = ({
     customer,
@@ -15,6 +16,7 @@ const GetCustomers = ({
     user,
     history,
     alert,
+    setLoading
 }) => {
     const [page, setPage] = useState(1);
     const [totalPage, setTotalPage] = useState([]);
@@ -23,6 +25,7 @@ const GetCustomers = ({
 
     useEffect(() => {
         getCustomers(page, queryName);
+        console.log(page)
     }, [page]);
 
     useEffect(() => {
@@ -149,8 +152,8 @@ const GetCustomers = ({
                         ) : null}
                     </tr>
                 </thead>
-                <tbody className={`${loading && 'd-none'}`}>
-                    {customer && customer.data.length > 0 ? (
+                <tbody>
+                    {!loading ? customer && customer.data.length > 0 ? (
                         customer.data.map((custom) => (
                             <tr key={custom.id}>
                                 <td>{custom.name}</td>
@@ -197,6 +200,12 @@ const GetCustomers = ({
                                     : checkAdminMerchant(user)
                                     ? 'Belum ada pelanggan, silahkan tambahkan pelanggan'
                                     : 'Belum ada pelanggan'}
+                            </td>
+                        </tr>
+                    ) : (
+                        <tr>
+                            <td colSpan="5" className="text-center">
+                                <TableLoadingSpinner loading={loading} />
                             </td>
                         </tr>
                     )}

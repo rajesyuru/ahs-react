@@ -1,15 +1,21 @@
-import React from "react";
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { Alert } from 'reactstrap';
 
 function Alerts({ alerts }) {
     return (
-        alerts.length > 0 &&
-        alerts.map((alert) => (
-            <div className={`alert alert-${alert.type}`} key={alert.id}>
-                {alert.message}
-            </div>
-        ))
+        <div>
+            {alerts.length > 0 ? (
+                <Fragment>
+                    {alerts.map((alert) => (
+                        <Alert color={alert.type} key={alert.id} className="notification-alert"> 
+                            {alert.message}
+                        </Alert>
+                    ))}
+                </Fragment>
+            ) : null}
+        </div>
     );
 }
 
